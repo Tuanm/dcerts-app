@@ -1,0 +1,24 @@
+$padding: 10px;
+$fontSize: 120%;
+$fontColor: #000;
+
+
+.container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+
+.button {
+    padding: $padding;
+    font-size: $fontSize;
+    color: $fontColor;
+    background-color: unset;
+    border: none;
+    cursor: pointer;
+}
+
+.button:hover {
+    text-decoration: underline;
+}

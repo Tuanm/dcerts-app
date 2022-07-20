@@ -1,0 +1,72 @@
+$background: #fff;
+$margin: 60px 40px 0;
+$padding: 20px;
+$borderRadius: 10px;
+$boxShadow: 0 0 10px rgba(0, 0, 0, 0.1);
+$width: 400px;
+
+$successBackground: rgb(166, 241, 159);
+$errorBackground: rgb(253, 162, 162);
+$warningBackground: rgb(250, 222, 129);
+
+$textFontSize: 16px;
+
+$titleFontSize: 22px;
+$titleFontWeight: 600;
+
+$floatUp: floatUp linear 0.2s forwards;
+
+
+.container {
+    position: fixed;
+    top: 0;
+    right: 0;
+
+    margin: $margin;
+    width: $width;
+    min-width: $width;
+    animation: $floatUp;
+
+    padding: $padding;
+    border-radius: $borderRadius;
+
+    background-color: $background;
+    box-shadow: $boxShadow;
+
+    z-index: 2;
+}
+
+.title {
+    position: absolute;
+    font-size: $titleFontSize;
+    font-weight: $titleFontWeight;
+}
+
+.text {
+    position: relative;
+    margin-top: 40px;
+    font-size: $textFontSize;
+
+    * {
+        margin-top: 10px;
+    }
+}
+
+.success {
+    background-color: $successBackground;
+}
+
+.error {
+    background-color: $errorBackground;
+}
+
+.warning {
+    background-color: $warningBackground;
+}
+
+@keyframes floatUp {
+    from {
+        transform: translateY(20px);
+    }
+    to {}
+}

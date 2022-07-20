@@ -1,0 +1,118 @@
+$optionBackgroundColor: #fff;
+$optionHoverBackgroundColor: #9cf885;
+$selectedOptionBackgroundColor: #60d4f7;
+$fontSize: 18px;
+$padding: 20px;
+$borderRadius: 10px;
+$boxShadow: 0 0 10px rgba(0, 0, 0, 0.1);
+$hoverBoxShadow: 0 0 30px rgba(0, 0, 0, 0.1);
+$margin: 20px;
+
+$buttonBoxShadow: 0 0 10px rgba(0, 0, 0, 0.1);
+$buttonHoverBoxShadow: 0 0 30px rgba(0, 0, 0, 0.1);
+
+$zoomOut: zoomOut linear 0.2s forwards;
+$zoomIn: zoomIn linear 0.2s forwards;
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+.input, .button {
+    display: inline-flex;
+    align-items: center;
+
+    input {
+        font-size: $fontSize;
+        border: none;
+        box-shadow: $boxShadow;
+        border-radius: $borderRadius;
+        padding: $padding;
+        margin: $margin;
+        width: 100vh;
+    }
+
+    input:hover {
+        box-shadow: $hoverBoxShadow;
+    }
+
+    input:focus {
+        animation: $zoomOut;
+    }
+
+    input:not(:focus) {
+        animation: $zoomIn;
+    }
+}
+
+.button {
+    input {
+        cursor: pointer;
+        background-color: $optionHoverBackgroundColor;
+        max-width: fit-content;
+        box-shadow: $buttonBoxShadow;
+        animation: $zoomIn;
+
+        &:hover {
+            animation: $zoomOut;
+            box-shadow: $buttonHoverBoxShadow;
+        }
+    }
+}
+
+.pane {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+.options {
+    position: absolute;
+    padding: $padding;
+    width: 100%;
+    max-height: 40vh;
+    overflow: hidden;
+    overflow-y: scroll;
+
+    .option {
+        background: $optionBackgroundColor;
+        margin-bottom: $margin;
+        margin-right: $margin;
+        max-width: 100vh;
+        padding: $padding;
+        border-radius: $borderRadius;
+        box-shadow: $boxShadow;
+        transition: all 0.3s ease-in-out;
+        cursor: pointer;
+        animation: $zoomIn;
+
+        &:hover {
+            background: $optionHoverBackgroundColor;
+        }
+    }
+
+    .selected {
+        background: $selectedOptionBackgroundColor;
+    }
+}
+
+@keyframes zoomOut {
+    from {}
+    to {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(1.05);
+    }
+    to {}
+}

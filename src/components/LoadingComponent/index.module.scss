@@ -1,0 +1,22 @@
+
+
+.container {
+    display: flex;
+    justify-content: center;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    .text {
+        position: relative;
+        font-size: 200%;
+
+        .clickable {
+            display: inline-flex;
+            position: relative;
+            z-index: 2;
+        }
+    }
+}

@@ -1,0 +1,26 @@
+* {
+    font-family: 'Avant Garde', Avantgarde, 'Century Gothic', CenturyGothic, 'AppleGothic', sans-serif;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-smooth: always;
+    -moz-osx-font-smoothing: antialiased !important;
+    -webkit-font-smoothing: antialiased !important;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
+}
+
+.container, .background {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+.background {
+    // opacity: 60%;
+    background-color: rgb(231, 247, 91);
+    background-repeat: no-repeat;
+    background-size: cover;
+}

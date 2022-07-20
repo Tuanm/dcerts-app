@@ -1,0 +1,10 @@
+{
+    "abi": [
+        "function add(bytes)",
+        "function lock(bytes)",
+        "function unlock(bytes)",
+        "function addBatch(bytes)",
+        "function lockBatch(bytes)",
+        "function unlockBatch(bytes)"
+    ]
+}

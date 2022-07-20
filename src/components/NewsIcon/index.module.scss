@@ -1,0 +1,144 @@
+$background: #fff;
+$margin: 60px 40px 0;
+$padding: 20px;
+$borderRadius: 10px;
+$boxShadow: 0 0 10px rgba(0, 0, 0, 0.1);
+$width: 600px;
+$height: 80px;
+$highlightBackgroundColor: rgb(172, 255, 197);
+$warningBackgroundColor: rgb(241, 100, 100);
+
+$titleFontSize: 22px;
+$titleFontWeight: 500;
+
+$hiddenTextFontWeight: 600;
+
+$zoomOut: zoomOut linear 0.2s forwards;
+$zoomIn: zoomIn linear 0.2s forwards;
+
+$widen: widen linear 0.2s forwards;
+$shorten: shorten linear 0.2s forwards;
+
+
+.container {
+    display: flex;
+    position: relative;
+
+    margin: $margin;
+    width: $width;
+    min-width: $width;
+    height: $height;
+    animation: $zoomIn;
+
+    padding: $padding;
+    border-radius: $borderRadius;
+
+    background-color: $background;
+    box-shadow: $boxShadow;
+    overflow: hidden;
+
+    img {
+        display: flex;
+        position: absolute;
+        right: 5%;
+        opacity: 20%;
+    }
+}
+
+.special {
+    background-color: $highlightBackgroundColor;
+}
+
+.highlight::after {
+    content: '';
+    background: $highlightBackgroundColor;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    transform: rotate(-60deg);
+}
+
+.warning::after {
+    content: '';
+    background: $warningBackgroundColor;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    transform: rotate(-60deg);
+}
+
+.title {
+    position: relative;
+    font-size: $titleFontSize;
+    font-weight: $titleFontWeight;
+}
+
+.container:hover {
+    cursor: pointer;
+    animation: $zoomOut;
+    z-index: 1;
+
+    .title {
+        opacity: 0%;
+    }
+
+    .hidden {
+        opacity: 100%;
+    }
+}
+
+.hidden {
+    position: absolute;
+    font-size: $titleFontSize;
+    font-weight: $hiddenTextFontWeight;
+    opacity: 0%;
+}
+
+.removeable {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    background-color: $warningBackgroundColor;
+    animation: $shorten;
+}
+
+.removeable:hover {
+    animation: $widen;
+}
+
+@keyframes zoomOut {
+    from {}
+    to {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(1.1);
+    }
+    to {}
+}
+
+@keyframes widen {
+    from {
+        width: 10%;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+@keyframes shorten {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 10%;
+    }
+}

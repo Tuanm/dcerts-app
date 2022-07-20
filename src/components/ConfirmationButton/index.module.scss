@@ -1,0 +1,83 @@
+$buttonFontColor: #fff;
+$buttonSize: 50px;
+$buttonBorder: 2px solid #000;
+$buttonPadding: 20px;
+$buttonMargin: 6px;
+
+$buttonBoxShadow: 0 0 10px rgba(0, 0, 0, 0.1);
+$buttonHoverBoxShadow: 0 0 30px rgba(0, 0, 0, 0.1);
+
+$zoomOut: zoomOut linear 0.2s forwards;
+$zoomIn: zoomIn linear 0.2s forwards;
+$appear: appear linear 0.2s forwards;
+
+$confirmColor: rgb(81, 240, 128);
+$rejectColor: rgb(241, 57, 57);
+$confirmFontColor: rgb(0, 0, 0);
+$rejectFontColor: rgb(255, 255, 255);
+
+$submitWidth: 150px;
+$submitFontSize: 20px;
+$submitBorderRadius: 10px;
+$submitMargin: 50px;
+
+
+.container {
+    position: relative;
+    justify-content: center;
+
+    button {
+        color: $buttonFontColor;
+        height: $buttonSize;
+        border: none;
+        padding: $buttonPadding;
+        margin: $buttonMargin;
+        animation: $zoomIn;
+        box-shadow: $buttonBoxShadow;
+    }
+
+    button:hover {
+        cursor: pointer;
+        z-index: 1;
+        animation: $zoomOut;
+        box-shadow: $buttonHoverBoxShadow;
+    }
+}
+
+.submit {
+    position: relative;
+    width: $submitWidth;
+    background-color: $confirmColor;
+    font-size: $submitFontSize;
+    border-radius: $submitBorderRadius;
+    margin-top: $submitMargin;
+    margin-bottom: $submitMargin;
+
+    .text {
+        line-height: 0%;
+        color: $confirmFontColor;
+    }
+}
+
+.reject {
+    background-color: $rejectColor;
+
+    .text {
+        line-height: 0%;
+        color: $rejectFontColor;
+    }
+}
+
+@keyframes zoomOut {
+    from {}
+    to {
+        transform: scale(1.2);
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(1.2);
+    }
+    to {}
+}

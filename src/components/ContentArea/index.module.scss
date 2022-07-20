@@ -1,0 +1,79 @@
+$background: #fff;
+$margin: 60px 40px 0;
+$padding: 20px;
+$borderRadius: 10px;
+$boxShadow: 0 0 10px rgba(0, 0, 0, 0.1);
+$width: 600px;
+$height: 200px;
+
+$idFontSize: 50px;
+$idFontWeight: 800;
+
+$textFontSize: 16px;
+
+$titleFontSize: 22px;
+$titleFontWeight: 600;
+
+$zoomIn: zoomIn linear 0.2s forwards;
+
+
+.container {
+    display: flex;
+    position: relative;
+
+    margin: $margin;
+    width: $width;
+    min-width: $width;
+    min-height: $height;
+    animation: $zoomIn;
+
+    padding: $padding;
+    border-radius: $borderRadius;
+
+    background-color: $background;
+    box-shadow: $boxShadow;
+
+    z-index: 1;
+}
+
+.id {
+    text-align: right;
+    position: absolute;
+    font-size: $idFontSize;
+    font-weight: $idFontWeight;
+    right: -5%;
+    top: -10%;
+}
+
+.title {
+    position: absolute;
+    font-size: $titleFontSize;
+    font-weight: $titleFontWeight;
+}
+
+.text {
+    position: relative;
+    margin-top: 40px;
+    font-size: $textFontSize;
+
+    * {
+        margin-top: 10px;
+    }
+}
+
+.shortcut {
+    margin-left: 10%;
+}
+
+.submit {
+    position: absolute;
+    bottom: 0%;
+    right: -5%;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(1.1);
+    }
+    to {}
+}

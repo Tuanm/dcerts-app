@@ -1,0 +1,72 @@
+$background: #000;
+$squareSize: 25px;
+$squareColor: rgb(247, 158, 43);
+$squareMargin: 20px;
+$blurSize: 20px;
+
+$zoom: zoom linear 1.5s infinite;
+
+.back {
+    display: flex;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    align-items: center;
+    z-index: 1;
+}
+
+.blur {
+    display: flex;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    align-items: center;
+    background-color: $background;
+    animation: changeOpacity 2.5s linear infinite;
+    z-index: 1;
+
+    -webkit-filter: blur($blurSize);
+    -moz-filter: blur($blurSize);
+    -ms-filter: blur($blurSize);
+    -o-filter: blur($blurSize);
+    filter: blur($blurSize);
+}
+
+.container {
+    display: flex;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    align-items: center;
+    z-index: 1;
+    overflow: hidden;
+
+    .pane {
+        margin: auto;
+        position: relative;
+        flex-wrap: nowrap;
+    }
+}
+
+@keyframes changeOpacity {
+	0% {
+        opacity: 10%;
+    }
+    50% {
+        opacity: 40%;
+    }
+    100% {
+        opacity: 10%;
+    }
+}
+
+@keyframes zoom {
+    0% {}
+    50% {
+        transform: scale(2);
+    }
+    100% {}
+}
