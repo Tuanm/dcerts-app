@@ -5,7 +5,9 @@ import Web3Value from '../../utils/web3';
 export const Web3Context = React.createContext({} as Web3Value);
 
 interface Web3Props {
-    children: React.ReactNode;
+    children: React.ReactNode,
+    onConnected?: () => void,
+    onFailed?: () => void,
 }
 
 const Web3 = (props: Web3Props) => {
@@ -18,8 +20,14 @@ const Web3 = (props: Web3Props) => {
     };
 
     useEffect(() => {
-        connect();
-    }, []);
+        if (window.ethereum) {
+            connect();
+        } else {
+            if (props.onFailed) {
+                props.onFailed();
+            }
+        }
+    }, [window.ethereum]);
 
     return (
         <Web3Context.Provider value={web3}>

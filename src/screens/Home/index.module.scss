@@ -1,0 +1,21 @@
+$fontSize: 200%;
+$margin: 20px;
+$textMinWidth: 180px;
+
+.container {
+    display: flex;
+    justify-content: center;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    .text {
+        position: relative;
+        margin: $margin;
+        font-size: $fontSize;
+        min-width: $textMinWidth;
+        text-align: center;
+    }
+}

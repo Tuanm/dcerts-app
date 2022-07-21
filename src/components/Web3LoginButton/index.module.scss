@@ -1,0 +1,24 @@
+$padding: 20px;
+$fontSize: 180%;
+$fontColor: #fff;
+$maxHeight: 100px;
+$background: #000;
+$border: 2px solid #000;
+$borderRadius: 10px;
+
+
+.button {
+    background-color: $background;
+    max-height: $maxHeight;
+    padding: $padding;
+    font-size: $fontSize;
+    color: $fontColor;
+    border: $border;
+    border-radius: $borderRadius;
+    cursor: pointer;
+}
+
+.button:hover {
+    color: $background;
+    background-color: $fontColor;
+}

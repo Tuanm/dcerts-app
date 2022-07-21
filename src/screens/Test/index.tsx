@@ -6,7 +6,6 @@ import SelectionPane from '../../components/SelectionPane';
 import SimpleInput from '../../components/SimpleInput';
 import SubmitButton from '../../components/SubmitButton';
 import styles from './index.module.scss';
-import { ethers } from 'ethers';
 import { Web3Context } from '../../components/Web3';
 import { signAdd } from '../../contracts/ContentPool';
 
@@ -20,14 +19,8 @@ const Test = () => {
 
         const test = async () => {
             const { abi } = require('../../contracts/BallotWallet.json');
-            const contentPoolAddress = '0xe7f1725e7734ce288f8367e1bb143e90bb3f0512';
             const contract = web3.contract('0x5fbdb2315678afecb367f032d93f642f64180aa3', abi);
-            const { functionName, parameters } = signAdd('QmRn8wiXwyPEE3SnZFRS2ef8V5S3eT3rAFpSWG8wy55eEd');
-            await contract.start(
-                contentPoolAddress,
-                functionName,
-                parameters,
-            );
+            await contract.vote(13, true);
         };
 
         if (loaded) test();
