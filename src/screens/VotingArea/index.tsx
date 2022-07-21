@@ -9,13 +9,13 @@ import IPFS from '../../utils/ipfs';
 import styles from './index.module.scss';
 import { NotificationContext } from '../../App';
 import ConfirmationPane from '../../components/ConfirmationPane';
-import { DashRoute } from '../../Routes';
+import { DashRoute, UploadAreaRoute, VotingAreaRoute } from '../../Routes';
 import { useParams } from 'react-router-dom';
 import AuthFilter from '../../components/AuthFilter';
 
 const VotingArea = () => {
     const web3 = useContext(Web3Context);
-    const { group } = useParams();
+    const { group, id } = useParams();
     const pushNotification = useContext(NotificationContext);
     const [loaded, setLoaded] = useState(false);
     const [ipfs, setIPFS] = useState<IPFS>();
@@ -31,6 +31,9 @@ const VotingArea = () => {
     useEffect(() => {
         if (loaded) {
             setIPFS(IPFS.create(process.env.REACT_APP_IPFS_URL));
+            if (id && !Number.isNaN(parseInt(id))) {
+                setAction(parseInt(id));
+            }
         }
     }, [loaded]);
 
@@ -53,10 +56,8 @@ const VotingArea = () => {
     const vote = async (affirmed: boolean) => {
         setWaiting(true);
         try {
-            if (Number.isInteger(action)) {
-                const { abi } = require('../../contracts/BallotWallet.json');
-                const contract = web3.contract('0xc6e7df5e7b4f2a278906862b61205850344d4e7d', abi);
-                await contract.vote(action, affirmed, { gasLimit: 999999 });
+            if (group && Number.isInteger(action)) {
+                await web3.send(group, 'vote', ['uint256', 'bool'], action, affirmed);
                 handleSuccess(`Action ${action} has been voted.`);
             }
         } catch (err: any) {
@@ -79,6 +80,14 @@ const VotingArea = () => {
             <NavigationBar
                 links={[
                     DashRoute,
+                    {
+                        path: VotingAreaRoute.path.replace(':group', group || ''),
+                        text: 'Vote',
+                    },
+                    {
+                        path: UploadAreaRoute.path.replace(':group', group || ''),
+                        text: 'Upload',
+                    },
                 ]}
             />
             <AuthFilter
@@ -89,7 +98,8 @@ const VotingArea = () => {
                 <>
                     <div className={styles.container}>
                         <SimpleInput
-                            placeholder={'What action do you want to vote?'}
+                            locked={id !== undefined}
+                            placeholder={id || 'What action do you want to vote?'}
                             onChange={(text: string) => {
                                 const parsed = parseInt(text);
                                 if (Number.isInteger(parsed)) {

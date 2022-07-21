@@ -3,6 +3,7 @@ import { useRoutes } from 'react-router-dom';
 import Dashboard from './screens/Dashboard';
 import Home from './screens/Home';
 import NotFound from './screens/NotFound';
+import Search from './screens/Search';
 import Test from './screens/Test';
 import UploadArea from './screens/UploadArea';
 import VotingArea from './screens/VotingArea';
@@ -25,8 +26,14 @@ export const DashRoute = {
     element: <Dashboard />,
 };
 
+export const SearchRoute = {
+    text: 'Search',
+    path: '/:group/search',
+    element: <Search />,
+};
+
 export const UploadAreaRoute = {
-    text: 'Add',
+    text: 'Upload',
     path: '/:group/add',
     element: <UploadArea />,
 };
@@ -34,6 +41,12 @@ export const UploadAreaRoute = {
 export const VotingAreaRoute = {
     text: 'Vote',
     path: '/:group/vote',
+    element: <VotingArea />,
+};
+
+export const WithIdVotingAreaRoute = {
+    text: 'Vote',
+    path: '/:group/vote/:id',
     element: <VotingArea />,
 };
 
@@ -48,8 +61,10 @@ const Routes = () => {
         TestRoute,
         HomeRoute,
         DashRoute,
+        SearchRoute,
         UploadAreaRoute,
         VotingAreaRoute,
+        WithIdVotingAreaRoute,
         NotFoundRoute, // let it be the last route
     ]);
 

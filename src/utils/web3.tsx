@@ -11,6 +11,10 @@ export default class Web3 {
         return new Web3(provider);
     }
 
+    getProvider() {
+        return this.provider;
+    }
+
     async accounts() {
         return this.provider.listAccounts();
     }
@@ -25,7 +29,7 @@ export default class Web3 {
     }
 
     getRevertReason(message: string) {
-        const regex = /reverted with reason string '(.*)'\",\"data/g;
+        const regex = /reverted with reason string '(.*)'/g;
         const matches = [];
         const iterator = message.matchAll(regex);
         while (true) {
@@ -33,6 +37,18 @@ export default class Web3 {
             if (match.done) break;
             matches.push(match.value);
         }
-        return ([...matches][0] || [])[1] || message;
+        let matched = ([...matches][0] || [])[1] || '';
+        const end = matched.indexOf(`'`)
+        if (end >= 0) matched = matched.substring(0, end);
+        return matched || message;
+    }
+
+    async send(address: string, method: string, types: string[], ...params: any[]) {
+        const signature = ethers.utils.id(`${method}(${types.join(',')})`).slice(0, 10);
+        const values = new ethers.utils.AbiCoder().encode(types, params).substring(2);
+        return this.provider.getSigner().sendTransaction({
+            to: address,
+            data: signature + values,
+        });
     }
 }

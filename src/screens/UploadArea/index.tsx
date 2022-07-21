@@ -9,9 +9,8 @@ import WaitingForTransaction from '../../components/WaitingForTransaction';
 import { Web3Context } from '../../components/Web3';
 import IPFS from '../../utils/ipfs';
 import styles from './index.module.scss';
-import { signAdd, signAddBatch } from '../../contracts/ContentPool';
 import { NotificationContext } from '../../App';
-import { DashRoute } from '../../Routes';
+import { DashRoute, UploadAreaRoute, VotingAreaRoute } from '../../Routes';
 import AuthFilter from '../../components/AuthFilter';
 import { useParams } from 'react-router-dom';
 
@@ -51,28 +50,33 @@ const UploadArea = () => {
             message: data,
             type: 'success',
         });
-    }
+    };
+
+    const getTagFromFileName = (file: File) => {
+        const tag = file.name.substring(0, file.name.lastIndexOf('.'));
+        return parseInt(tag);
+    };
 
     const upload = async () => {
         setWaiting(true);
         try {
-            if (files.length && ipfs) {
-                const contents = [];
+            if (group && files.length && ipfs) {
+                const contents = [] as {
+                    cid: string,
+                    tag: number,
+                }[];
                 for (const file of files) {
-                    contents.push(await file.text());
+                    const tag = getTagFromFileName(file);
+                    if (Number.isNaN(tag)) {
+                        throw new Error('File name must be a number!');
+                    }
+                    const text = await file.text();
+                    const cid = (await ipfs.add(text)).toString();
+                    contents.push({ cid, tag });
                 }
-                const contentPoolAddress = process.env.REACT_APP_CONTENT_POOL_ADDRESS || '';
-                const { abi } = require('../../contracts/BallotWallet.json');
-                const contract = web3.contract('0xc6e7df5e7b4f2a278906862b61205850344d4e7d', abi);
-                const cids = (await ipfs.addAll(contents)).map((cid) => cid.toString());
-                const { functionName, parameters } = cids.length > 1
-                    ? signAddBatch(cids)
-                    : signAdd(cids[0]);
-                await contract.start(
-                    contentPoolAddress,
-                    functionName,
-                    parameters,
-                );
+                await web3.send(group, 'addBatch', ['(string,uint256)[]'], [
+                    ...contents.map((content) => [content.cid, content.tag]),
+                ]);
                 setFiles([]);
                 handleSuccess('Uploaded.');
             }
@@ -87,6 +91,14 @@ const UploadArea = () => {
             <NavigationBar
                 links={[
                     DashRoute,
+                    {
+                        path: VotingAreaRoute.path.replace(':group', group || ''),
+                        text: 'Vote',
+                    },
+                    {
+                        path: UploadAreaRoute.path.replace(':group', group || ''),
+                        text: 'Upload',
+                    },
                 ]}
             />
             <AuthFilter
@@ -112,7 +124,7 @@ const UploadArea = () => {
                                         title={file.name}
                                         onClick={async () => {
                                             setPeekingContent({
-                                                id: index,
+                                                id: getTagFromFileName(file),
                                                 title: file.name,
                                                 content: await file.text(),
                                             });

@@ -6,6 +6,7 @@ interface SimpleInputProps {
     value?: string;
     type?: string;
     accept?: string[];
+    locked?: boolean;
     onChange?: (value: any) => void;
     onFocus?: () => void;
     onBlur?: () => void;
@@ -32,7 +33,7 @@ const SimpleInput = (props: SimpleInputProps) => {
                 onBlur={(e) => {
                     if (props.onBlur) props.onBlur();
                 }}
-                readOnly={isFile}
+                readOnly={props.locked || isFile}
                 onClick={(e) => {
                     if (isFile) {
                         if (fileInput.current) fileInput.current.click();

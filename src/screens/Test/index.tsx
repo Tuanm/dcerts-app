@@ -7,6 +7,7 @@ import SimpleInput from '../../components/SimpleInput';
 import SubmitButton from '../../components/SubmitButton';
 import styles from './index.module.scss';
 import { Web3Context } from '../../components/Web3';
+import { ethers } from 'ethers';
 import { signAdd } from '../../contracts/ContentPool';
 
 const Test = () => {
@@ -14,16 +15,19 @@ const Test = () => {
     const [loaded, setLoaded] = useState(false);
     const [text, setText] = useState('');
 
+    const test = async () => {
+        const signature = ethers.utils.id('add(string,uint256)').slice(0, 10);
+        const params = new ethers.utils.AbiCoder().encode(['string', 'uint256'], ['Hello World', 69]).substring(2);
+        console.log(signature, params);
+        const result = await web3.getProvider().call({
+            to: '0xa85233c63b9ee964add6f2cffe00fd84eb32338f',
+            data: signature + params,
+        });
+        console.log(result);
+    };
+
     useEffect(() => {
         setLoaded(true);
-
-        const test = async () => {
-            const { abi } = require('../../contracts/BallotWallet.json');
-            const contract = web3.contract('0x5fbdb2315678afecb367f032d93f642f64180aa3', abi);
-            await contract.vote(13, true);
-        };
-
-        if (loaded) test();
     }, [loaded]);
 
     const pushNotification = useContext(NotificationContext);
@@ -33,10 +37,13 @@ const Test = () => {
     };
 
     const click = () => {
-        pushNotification({
-            title: 'Test',
-            message: text,
-        });
+        (async () => {
+            await test();
+            pushNotification({
+                title: 'Test',
+                message: text,
+            });
+        })();
     };
 
     return (

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NotificationContext } from '../../App';
 import { HomeRoute } from '../../Routes';
+import API from '../../services';
 import Wall from '../../services/wall';
 import LoadingComponent from '../LoadingComponent';
 import LogoutButton from '../LogoutButton';
@@ -28,7 +29,6 @@ const AuthFilter = (props: AuthProps) => {
 
     const authorize = async () => {
         const { id, data } = await Wall.me();
-        console.log(data);
         if (!id) throw new Error(AuthMessages.UNAUTHORIZED);
         if (props.group && !data.includes(props.group)) {
             throw new Error(AuthMessages.NO_PERMISSION);
@@ -41,7 +41,6 @@ const AuthFilter = (props: AuthProps) => {
             setAuthorizing(true);
             try {
                 const data = await authorize();
-                setAuthorizing(false);
                 setAuthorized(true);
                 props.setLoaded(true);
                 if (props.setGroups) props.setGroups(data);
@@ -62,8 +61,12 @@ const AuthFilter = (props: AuthProps) => {
                     } else {
                         navigate(-1);
                     }
+                } else {
+                    API.clearToken();
+                    props.setLoaded(true);
                 }
             }
+            setAuthorizing(false);
         })();
     }, []);
 

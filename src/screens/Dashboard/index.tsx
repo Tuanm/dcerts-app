@@ -4,7 +4,7 @@ import AuthFilter from '../../components/AuthFilter';
 import DropDownMenu from '../../components/DropDownMenu';
 import NavigationBar from '../../components/NavigationBar';
 import SubmitButton from '../../components/SubmitButton';
-import { DashRoute } from '../../Routes';
+import { DashRoute, SearchRoute } from '../../Routes';
 import styles from './index.module.scss';
 
 const Dashboard = () => {
@@ -14,7 +14,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     const goToGroup = () => {
-        if (group) navigate(`/${group}/vote`);
+        if (group) navigate(SearchRoute.path.replace(':group', group));
     };
 
     return (
@@ -31,12 +31,12 @@ const Dashboard = () => {
             {loaded && (
                 <div className={styles.container}>
                     <DropDownMenu
-                        text={'Choose a group...'}
+                        text={'You can search your groups here...'}
                         options={groups}
                         onOptionChanged={setGroup}
                     />
                     {group && (
-                        <SubmitButton title={'Submit!'} onClick={goToGroup} />
+                        <SubmitButton title={'Go!'} onClick={goToGroup} />
                     )}
                 </div>
             )}
