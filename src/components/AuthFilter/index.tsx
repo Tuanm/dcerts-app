@@ -28,12 +28,18 @@ const AuthFilter = (props: AuthProps) => {
     const isHome = window.location.pathname === HomeRoute.path;
 
     const authorize = async () => {
-        const { id, data } = await Wall.me();
-        if (!id) throw new Error(AuthMessages.UNAUTHORIZED);
-        if (props.group && !data.includes(props.group)) {
-            throw new Error(AuthMessages.NO_PERMISSION);
+        try {
+            const { data } = await Wall.me();
+            if (props.group && !data.includes(props.group)) {
+                throw new Error(AuthMessages.NO_PERMISSION);
+            }
+            return data;
+        } catch (err: any) {
+            if (err?.message === AuthMessages.NO_PERMISSION) {
+                throw err;
+            }
+            throw new Error(AuthMessages.UNAUTHORIZED);
         }
-        return data;
     };
 
     useEffect(() => {
@@ -56,7 +62,7 @@ const AuthFilter = (props: AuthProps) => {
                 if (!isHome) {
                     if (props.fallbackUrl) {
                         navigate(props.fallbackUrl);
-                    } else if (err?.message === AuthMessages.NO_PERMISSION) {
+                    } else if (err?.message === AuthMessages.UNAUTHORIZED) {
                         navigate(HomeRoute.path);
                     } else {
                         navigate(-1);

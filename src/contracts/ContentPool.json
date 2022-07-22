@@ -1,10 +1,10 @@
 {
-    "abi": [
-        "function add(bytes)",
-        "function lock(bytes)",
-        "function unlock(bytes)",
-        "function addBatch(bytes)",
-        "function lockBatch(bytes)",
-        "function unlockBatch(bytes)"
-    ]
+    "functions": {
+        "add": ["string,uint256"],
+        "lock": ["uint256"],
+        "unlock": ["uint256"],
+        "addBatch": ["(string,uint256)[]"],
+        "lockBatch": ["uint256"],
+        "unlockBatch": ["uint256"]
+    }
 }

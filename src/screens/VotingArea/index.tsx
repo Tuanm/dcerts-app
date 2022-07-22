@@ -12,6 +12,9 @@ import ConfirmationPane from '../../components/ConfirmationPane';
 import { DashRoute, UploadAreaRoute, VotingAreaRoute } from '../../Routes';
 import { useParams } from 'react-router-dom';
 import AuthFilter from '../../components/AuthFilter';
+import SubmitButton from '../../components/SubmitButton';
+import BallotWallet from '../../contracts/BallotWallet';
+import { BigNumber } from 'ethers';
 
 const VotingArea = () => {
     const web3 = useContext(Web3Context);
@@ -22,11 +25,6 @@ const VotingArea = () => {
     const [action, setAction] = useState<number>();
     const [waiting, setWaiting] = useState(false);
     const [peeking, setPeeking] = useState(false);
-    const [peekingContent, setPeekingContent] = useState({
-        id: 0,
-        title: '',
-        content: '',
-    });
 
     useEffect(() => {
         if (loaded) {
@@ -35,7 +33,7 @@ const VotingArea = () => {
                 setAction(parseInt(id));
             }
         }
-    }, [loaded]);
+    }, [loaded, group, id]);
 
     const handleError = (err: any) => {
         pushNotification({
@@ -52,6 +50,30 @@ const VotingArea = () => {
             type: 'success',
         });
     }
+
+    const peek = async () => {
+        try {
+            if (group && Number.isInteger(action)) {
+                setPeeking(true);
+                const contract = BallotWallet.attach(group, web3);
+                const result = await contract.peek(Number(action));
+                const contents = [] as {
+                    cid: string,
+                    tag?: number,
+                }[];
+                result.decodedData.inputs.forEach((input) => {
+                    contents.push({
+                        cid: (input || [])[0] as string,
+                        tag: ((input || [])[1] as BigNumber).toNumber(),
+                    });
+                });
+
+                console.log(contents);
+            }
+        } catch (err: any) {
+            handleError(err);
+        }
+    };
 
     const vote = async (affirmed: boolean) => {
         setWaiting(true);
@@ -110,24 +132,22 @@ const VotingArea = () => {
                             }}
                         />
                         {action !== undefined && (
-                            <div className={styles.submit}>
-                                <ConfirmationPane
-                                    onConfirm={agree}
-                                    onReject={disagree}
+                            <>
+                                <SubmitButton
+                                    title={'Peek'}
+                                    onClick={peek}
                                 />
-                            </div>
+                                <div className={styles.submit}>
+                                    <ConfirmationPane
+                                        onConfirm={agree}
+                                        onReject={disagree}
+                                    />
+                                </div>
+                            </>
                         )}
                     </div>
                     {peeking && (
-                        <WaitingForTransaction
-                            onClickOut={() => setPeeking(false)}
-                        >
-                            <ContentArea
-                                id={peekingContent.id}
-                                title={peekingContent.title}
-                                content={peekingContent.content}
-                            />
-                        </WaitingForTransaction>
+                        <></>
                     )}
                     {waiting && <WaitingForTransaction />}
                 </>

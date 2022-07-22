@@ -42,8 +42,22 @@ const Queries = {
                 cancelled: true,
             },
         }
-    ]
-}
+    ],
+    CONTENT: [
+        {
+            name: 'Locked',
+            value: {
+                locked: true,
+            },
+        },
+        {
+            name: 'Not locked',
+            value: {
+                locked: false,
+            },
+        },
+    ],
+};
 
 const Search = () => {
     const pushNotification = useContext(NotificationContext);
@@ -61,7 +75,9 @@ const Search = () => {
             if (!collection) {
                 throw new Error('You must choose a type of searching!');
             }
-            setResult(await SearchAPI.forCollection(collection, query));
+            const data = await SearchAPI.forCollection(collection, query) as { id: number }[];
+            setResult(data);
+            if (data.length === 0) throw new Error('Not found!');
         } catch (err: any) {
             pushNotification({
                 title: 'Whoops!',
@@ -76,9 +92,16 @@ const Search = () => {
         navigate(WithIdVotingAreaRoute.path.replace(':group', group || '').replace(':id', action));
     };
 
+    const peekContent = (contentId: any) => {
+        // TODO: Display content
+    };
+
     const click = (id: any) => {
         if (collection === Collections.ACTION) {
-            enterVoteArea(id);
+            return enterVoteArea(id);
+        }
+        if (collection === Collections.CONTENT) {
+            return peekContent(id);
         }
     };
 
@@ -128,6 +151,23 @@ const Search = () => {
                                         setQuery({
                                             ...query,
                                             ...action.value,
+                                        });
+                                    }
+                                }
+                            }}
+                        />
+                    )}
+                    {collection === Collections.CONTENT && (
+                        <SelectionPane
+                            text={'Choose some filters...'}
+                            options={[...Queries.CONTENT.map((content) => content.name)]}
+                            onOptionsChanged={(...options: string[]) => {
+                                setQuery({});
+                                for (const content of Queries.CONTENT) {
+                                    if (options.includes(content.name)) {
+                                        setQuery({
+                                            ...query,
+                                            ...content.value,
                                         });
                                     }
                                 }

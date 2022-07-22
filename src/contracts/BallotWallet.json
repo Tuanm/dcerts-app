@@ -1,8 +1,7 @@
 {
     "abi": [
         "function isVoter(address _address) public view returns (bool)",
-        "function start(address _contractAddress, string memory _functionName, bytes calldata _parameters)",
-        "function vote(uint _actionId, bool _affirmed)",
-        "function peek(uint _actionId) public view returns (tuple(uint id, address contractAddress, address starter, uint startTime, string functionName, bytes parameters, bool executed, bool cancelled) memory)"
+        "function vote(uint256 _actionId, bool _affirmed)",
+        "function peek(uint256 _actionId) public view returns ((uint256 id, address starter, uint256 startTime, uint256 executionTime, uint256 cancellationTime, bytes data, bool executed, bool cancelled) memory)"
     ]
 }

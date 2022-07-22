@@ -8,7 +8,6 @@ import SubmitButton from '../../components/SubmitButton';
 import styles from './index.module.scss';
 import { Web3Context } from '../../components/Web3';
 import { ethers } from 'ethers';
-import { signAdd } from '../../contracts/ContentPool';
 
 const Test = () => {
     const web3 = useContext(Web3Context);

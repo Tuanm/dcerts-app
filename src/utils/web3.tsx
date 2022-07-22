@@ -29,7 +29,7 @@ export default class Web3 {
     }
 
     getRevertReason(message: string) {
-        const regex = /reverted with reason string '(.*)'/g;
+        const regex = /reverted with reason string ["']+(.*)["']+/g;
         const matches = [];
         const iterator = message.matchAll(regex);
         while (true) {
@@ -38,17 +38,49 @@ export default class Web3 {
             matches.push(match.value);
         }
         let matched = ([...matches][0] || [])[1] || '';
-        const end = matched.indexOf(`'`)
+        let end = 0;
+        while (true) {
+            if (!matched[end] || matched[end] === `'` || matched[end] === `"`) {
+                break;
+            }
+            end++;
+        }
         if (end >= 0) matched = matched.substring(0, end);
         return matched || message;
     }
 
-    async send(address: string, method: string, types: string[], ...params: any[]) {
-        const signature = ethers.utils.id(`${method}(${types.join(',')})`).slice(0, 10);
+    getFunctionSignature(method: string, types: string[]) {
+        return ethers.utils.id(`${method}(${types.join(',')})`).slice(0, 10);
+    }
+
+    getFunctionData(method: string, types: string[], ...params: any[]) {
+        const signature = this.getFunctionSignature(method, types);
         const values = new ethers.utils.AbiCoder().encode(types, params).substring(2);
+        return signature + values;
+    }
+
+    decode(method: string, types: string[], data: string) {
+        const signature = this.getFunctionSignature(method, types);
+        if (signature !== data.substring(0, 10)) {
+            throw new Error('Function not matched');
+        }
+        return ethers.utils.defaultAbiCoder.decode(
+            types,
+            ethers.utils.hexDataSlice(data, 4),
+        );
+    }
+
+    async call(address: string, method: string, types: string[], ...params: any[]) {
+        return this.provider.getSigner().call({
+            to: address,
+            data: this.getFunctionData(method, types, ...params),
+        });
+    }
+
+    async send(address: string, method: string, types: string[], ...params: any[]) {
         return this.provider.getSigner().sendTransaction({
             to: address,
-            data: signature + values,
+            data: this.getFunctionData(method, types, ...params),
         });
     }
 }

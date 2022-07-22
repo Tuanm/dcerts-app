@@ -34,7 +34,7 @@ const UploadArea = () => {
         if (loaded) {
             setIPFS(IPFS.create(process.env.REACT_APP_IPFS_URL));
         }
-    }, [loaded]);
+    }, [loaded, group]);
 
     const handleError = (err: any) => {
         pushNotification({
