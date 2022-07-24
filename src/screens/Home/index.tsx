@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NotificationContext } from '../../App';
 import AuthFilter from '../../components/AuthFilter';
@@ -13,6 +13,14 @@ const Home = () => {
     const navigate = useNavigate();
     const [signing, setSigning] = useState(false);
 
+    const isPopUp = () => window.opener && window.opener !== window;
+
+    useEffect(() => {
+        if (loaded && isPopUp()) {
+            setSigning(true);
+        }
+    }, [loaded]);
+
     return (
         <>
             <AuthFilter
@@ -21,14 +29,14 @@ const Home = () => {
             />
             {loaded && (
                 <div className={styles.container}>
-                    <div className={styles.text}>{'Sign in with'}</div>
+                    <div className={styles.text}>{'Đăng nhập với'}</div>
                     <Web3LoginButton
                         title={'MetaMask'}
-                        onSuccess={() => navigate('/dash')}
+                        onSuccess={() => navigate(DashRoute.path)}
                         onFailure={() => {
                             pushNotification({
-                                title: 'Whoops!',
-                                message: 'Something went wrong!',
+                                title: 'Ối!',
+                                message: 'Có lỗi xảy ra',
                                 type: 'error',
                             });
                             setSigning(false);

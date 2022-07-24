@@ -29,9 +29,6 @@ const NewsIcon = (props: NewsIconProps) => {
     };
 
     const getHoverTitle = () => {
-        if (!props.hoverTitle) {
-            return props.warnable ? 'Verify now!' : 'Check it now!';
-        }
         return props.hoverTitle;
     };
 

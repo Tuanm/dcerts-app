@@ -10,7 +10,7 @@ import { Web3Context } from '../../components/Web3';
 import IPFS from '../../utils/ipfs';
 import styles from './index.module.scss';
 import { NotificationContext } from '../../App';
-import { DashRoute, UploadAreaRoute, VotingAreaRoute } from '../../Routes';
+import { DashRoute, SearchRoute, UploadAreaRoute, VotingAreaRoute } from '../../Routes';
 import AuthFilter from '../../components/AuthFilter';
 import { useParams } from 'react-router-dom';
 
@@ -23,22 +23,25 @@ const UploadArea = () => {
     const [uploaded, setUploaded] = useState(false);
     const [waiting, setWaiting] = useState(false);
     const [peeking, setPeeking] = useState(false);
-    const [peekingContent, setPeekingContent] = useState({
-        id: 0,
-        title: '',
-        content: '',
-    });
+    const [peekingContent, setPeekingContent] = useState<{
+        id: number,
+        title: string,
+        content: {
+            type: string,
+            data: any,
+        },
+    }>();
     const [files, setFiles] = useState<File[]>([]);
 
     useEffect(() => {
         if (loaded) {
-            setIPFS(IPFS.create(process.env.REACT_APP_IPFS_URL));
+            setIPFS(IPFS.create());
         }
     }, [loaded, group]);
 
     const handleError = (err: any) => {
         pushNotification({
-            title: 'Whoops!',
+            title: 'Ối!',
             message: web3.getRevertReason(err?.message),
             type: 'error',
         });
@@ -46,15 +49,14 @@ const UploadArea = () => {
 
     const handleSuccess = (data?: any) => {
         pushNotification({
-            title: 'Successfully!',
+            title: 'Quá tuyệt vời!',
             message: data,
             type: 'success',
         });
     };
 
     const getTagFromFileName = (file: File) => {
-        const tag = file.name.substring(0, file.name.lastIndexOf('.'));
-        return parseInt(tag);
+        return file.name.substring(0, file.name.lastIndexOf('.'));
     };
 
     const upload = async () => {
@@ -63,22 +65,19 @@ const UploadArea = () => {
             if (group && files.length && ipfs) {
                 const contents = [] as {
                     cid: string,
-                    tag: number,
+                    tag: string,
                 }[];
                 for (const file of files) {
                     const tag = getTagFromFileName(file);
-                    if (Number.isNaN(tag)) {
-                        throw new Error('File name must be a number!');
-                    }
                     const text = await file.text();
-                    const cid = (await ipfs.add(text)).toString();
+                    const cid = (await ipfs.add(text)).toV1().toString();
                     contents.push({ cid, tag });
                 }
-                await web3.send(group, 'addBatch', ['(string,uint256)[]'], [
+                await web3.send(group, 'addBatch', ['(string,string)[]'], [
                     ...contents.map((content) => [content.cid, content.tag]),
                 ]);
                 setFiles([]);
-                handleSuccess('Uploaded.');
+                handleSuccess('Đã tạo một cuộc bỏ phiếu để cấp phát nội dung này.');
             }
         } catch (err: any) {
             handleError(err);
@@ -92,12 +91,16 @@ const UploadArea = () => {
                 links={[
                     DashRoute,
                     {
+                        path: SearchRoute.path.replace(':group', group || ''),
+                        text: SearchRoute.text,
+                    },
+                    {
                         path: VotingAreaRoute.path.replace(':group', group || ''),
-                        text: 'Vote',
+                        text: VotingAreaRoute.text,
                     },
                     {
                         path: UploadAreaRoute.path.replace(':group', group || ''),
-                        text: 'Upload',
+                        text: UploadAreaRoute.text,
                     },
                 ]}
             />
@@ -110,23 +113,38 @@ const UploadArea = () => {
                     <div className={styles.container}>
                         <SimpleInput
                             type={'file'}
-                            placeholder={'Add files'}
+                            placeholder={'Thêm nội dung!'}
                             onChange={(fileList: FileList) => {
-                                setFiles([...files, ...Array.from(fileList)]);
-                                setUploaded(true);
+                                try {
+                                    for (const file of Array.from(fileList)) {
+                                        if (file.type !== 'application/json') {
+                                            throw new Error('Chỉ chấp nhận tệp tin có định dạng JSON!');
+                                        }
+                                    }
+                                    setFiles([...files, ...Array.from(fileList)]);
+                                    setUploaded(true);
+                                } catch (err: any) {
+                                    handleError(err);
+                                }
                             }}
+                            accept={['.json']}
                         />
                         {uploaded && files.length > 0 && (
                             <div className={styles.pane}>
                                 {files.map((file, index) => (
                                     <NewsIcon
                                         key={index}
-                                        title={file.name}
+                                        title={file.name.replace(/.json$/, '')}
+                                        hoverTitle={'Xem chi tiết!'}
                                         onClick={async () => {
+                                            const content = JSON.parse((await file.text()).replaceAll(/[\r\n]/g, '')) as {
+                                                type: string,
+                                                data: any,
+                                            };
                                             setPeekingContent({
-                                                id: getTagFromFileName(file),
-                                                title: file.name,
-                                                content: await file.text(),
+                                                id: parseInt(getTagFromFileName(file)),
+                                                title: content.type,
+                                                content: content,
                                             });
                                             setPeeking(true);
                                         }}
@@ -141,11 +159,11 @@ const UploadArea = () => {
                         )}
                         {files.length > 0 && (
                             <div className={styles.submit}>
-                                <SubmitButton title={'Upload'} onClick={upload} />
+                                <SubmitButton title={'Cấp phát!'} onClick={upload} />
                             </div>
                         )}
                     </div>
-                    {peeking && (
+                    {peeking && peekingContent !== undefined && (
                         <WaitingForTransaction
                             onClickOut={() => setPeeking(false)}
                         >
@@ -159,7 +177,7 @@ const UploadArea = () => {
                     {waiting && <WaitingForTransaction />}
                 </>
             )}
-            {loaded && !ipfs && <LoadingComponent text={'Connecting to IPFS...'} />}
+            {loaded && !ipfs && <LoadingComponent text={'Đang kết nối với IPFS...'} />}
         </>
     );
 };

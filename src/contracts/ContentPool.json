@@ -1,9 +1,9 @@
 {
     "functions": {
-        "add": ["string,uint256"],
+        "add": ["string,string"],
         "lock": ["uint256"],
         "unlock": ["uint256"],
-        "addBatch": ["(string,uint256)[]"],
+        "addBatch": ["(string,string)[]"],
         "lockBatch": ["uint256"],
         "unlockBatch": ["uint256"]
     }

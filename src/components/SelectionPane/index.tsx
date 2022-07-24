@@ -71,7 +71,7 @@ const SelectionPane = (props: SelectionPaneProps) => {
                             <div className={styles.button}>
                                 <input
                                     type={'submit'}
-                                    value={'Finish!'}
+                                    value={'Hoàn thành!'}
                                     onClick={() => {
                                         setFocused(false);
                                         if (inputElement) {

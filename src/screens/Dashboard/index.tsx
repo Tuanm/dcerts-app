@@ -31,12 +31,12 @@ const Dashboard = () => {
             {loaded && (
                 <div className={styles.container}>
                     <DropDownMenu
-                        text={'You can search your groups here...'}
+                        text={'Hãy lựa chọn nhóm của bạn...'}
                         options={groups}
                         onOptionChanged={setGroup}
                     />
                     {group && (
-                        <SubmitButton title={'Go!'} onClick={goToGroup} />
+                        <SubmitButton title={'Truy cập!'} onClick={goToGroup} />
                     )}
                 </div>
             )}

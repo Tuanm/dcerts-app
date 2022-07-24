@@ -14,8 +14,8 @@ const NotFound = () => {
                 DashRoute,
             ]} />
             <LoadingComponent
-                text={'Whoops! This page is not available.'}
-                cancelText={'Go Home!'}
+                text={'Trang này không tồn tại.'}
+                cancelText={'Về Trang chủ!'}
                 onCancel={() => {
                     navigate('/');
                 }}

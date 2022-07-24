@@ -7,6 +7,14 @@ export default class API {
         return process.env.REACT_APP_BASE_API_URL;
     };
 
+    static raw() {
+        return axios;
+    }
+
+    static hasToken() {
+        return localStorage.getItem(JWT_KEY) !== undefined;
+    }
+
     static noAuth() {
         return axios.create({
             baseURL: API.baseUrl(),

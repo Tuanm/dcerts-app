@@ -1,17 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HomeRoute } from '../../Routes';
 import API from '../../services';
 import GoBackIcon from '../GoBackIcon';
 
 const LogoutButton = () => {
+    const [loggedOut, setLoggedOut] = useState(false);
+
     return (
-        <GoBackIcon
-            to={HomeRoute.path}
-            onClick={() => {
-                API.clearToken();
-            }}
-            text={'Log out'}
-        />
+        <>{!loggedOut && (
+            <GoBackIcon
+                to={HomeRoute.path}
+                onClick={() => {
+                    API.clearToken();
+                    setLoggedOut(true);
+                }}
+                text={'Đăng xuất'}
+            />
+        )}</>
     );
 };
 

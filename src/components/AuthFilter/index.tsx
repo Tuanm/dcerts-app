@@ -4,6 +4,7 @@ import { NotificationContext } from '../../App';
 import { HomeRoute } from '../../Routes';
 import API from '../../services';
 import Wall from '../../services/wall';
+import GoBackIcon from '../GoBackIcon';
 import LoadingComponent from '../LoadingComponent';
 import LogoutButton from '../LogoutButton';
 
@@ -13,64 +14,103 @@ interface AuthProps {
     fallbackUrl?: string,
     successUrl?: string,
     group?: string,
+    interval?: number,
 }
 
 const AuthMessages = {
-    UNAUTHORIZED: 'You must log in first!',
-    NO_PERMISSION: 'You have no permission to access this area!',
+    UNAUTHORIZED: 'Bạn cần đăng nhập để tiếp tục!',
+    NO_PERMISSION: 'Bạn không có quyền truy cập vào trang này.',
 };
 
 const AuthFilter = (props: AuthProps) => {
     const pushNotification = useContext(NotificationContext);
+    const [group, setGroup] = useState<string>()
     const [authorized, setAuthorized] = useState(false);
     const [authorizing, setAuthorizing] = useState(false);
+    const [timer, setTimer] = useState<NodeJS.Timer>();
     const navigate = useNavigate();
-    const isHome = window.location.pathname === HomeRoute.path;
+
+    const isHome = () => {
+        return window.location.pathname === HomeRoute.path;
+    };
+
+    const isPopUp = () => {
+        return window.opener && window.opener !== window;
+    };
+
+    const isEthereum = () => {
+        return window.ethereum !== undefined;
+    }
 
     const authorize = async () => {
+        let data: string[];
         try {
-            const { data } = await Wall.me();
-            if (props.group && !data.includes(props.group)) {
-                throw new Error(AuthMessages.NO_PERMISSION);
+            if (!isEthereum() || !API.hasToken()) {
+                throw new Error();
             }
-            return data;
+            data = (await Wall.me()).data;
         } catch (err: any) {
-            if (err?.message === AuthMessages.NO_PERMISSION) {
-                throw err;
-            }
             throw new Error(AuthMessages.UNAUTHORIZED);
+        }
+        if (props.group && !data.includes(props.group)) {
+            throw new Error(AuthMessages.NO_PERMISSION);
+        }
+        return data;
+    };
+
+    const startAuthorizing = async () => {
+        try {
+            const data = await authorize();
+            if (!isHome() && !isPopUp()) {
+                setAuthorized(true);
+            }
+            props.setLoaded(true);
+            if (props.setGroups) props.setGroups(data);
+            if (isHome() && props.successUrl) {
+                if (window.location.pathname !== props.successUrl) {
+                    navigate(props.successUrl);
+                }
+            }
+        } catch(err: any) {
+            const unauthorized = err?.message === AuthMessages.UNAUTHORIZED;
+            if (unauthorized) {
+                API.clearToken();
+            }
+            setAuthorized(false);
+            if (isHome()) {
+                props.setLoaded(true);
+            } else {
+                pushNotification({
+                    title: 'Ối!',
+                    message: err?.message,
+                    type: 'error',
+                });
+                if (unauthorized) {
+                    navigate(HomeRoute.path);
+                } else if (props.fallbackUrl) {
+                    navigate(props.fallbackUrl);
+                } else {
+                    navigate(-1);
+                }
+            }
+            if (timer) clearInterval(timer);
+            if (isPopUp()) {
+                setTimeout(() => {
+                    window.close();
+                }, 5000);
+            }
         }
     };
 
     useEffect(() => {
+        setGroup(props.group);
         (async () => {
             setAuthorizing(true);
-            try {
-                const data = await authorize();
-                setAuthorized(true);
-                props.setLoaded(true);
-                if (props.setGroups) props.setGroups(data);
-                if (props.successUrl) {
-                    navigate(props.successUrl);
-                }
-            } catch(err: any) {
-                pushNotification({
-                    title: 'Whoops!',
-                    message: err?.message,
-                    type: 'error',
-                });
-                if (!isHome) {
-                    if (props.fallbackUrl) {
-                        navigate(props.fallbackUrl);
-                    } else if (err?.message === AuthMessages.UNAUTHORIZED) {
-                        navigate(HomeRoute.path);
-                    } else {
-                        navigate(-1);
-                    }
-                } else {
-                    API.clearToken();
-                    props.setLoaded(true);
-                }
+            await startAuthorizing();
+            if (props.interval) {
+                setTimer(setInterval(async () => {
+                    await startAuthorizing();
+                }, props.interval));
             }
             setAuthorizing(false);
         })();
@@ -78,12 +118,20 @@ const AuthFilter = (props: AuthProps) => {
 
     return (
         <>
-            {authorizing && (
+            {authorizing && !group && (
                 <LoadingComponent
-                    text={'Please wait...'}
+                    text={'Vui lòng đợi...'}
                 />
             )}
-            {authorized && <LogoutButton />}
+            {authorized && (
+                <>
+                    <GoBackIcon
+                        text={'Quay lại'}
+                        onClick={() => navigate(-1)}
+                    />
+                    {/* <LogoutButton /> */}
+                </>
+            )}
         </>
     );
 };

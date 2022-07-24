@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react';
-import ContentArea from '../../components/ContentArea';
 import LoadingComponent from '../../components/LoadingComponent';
 import NavigationBar from '../../components/NavigationBar';
 import SimpleInput from '../../components/SimpleInput';
@@ -9,35 +8,39 @@ import IPFS from '../../utils/ipfs';
 import styles from './index.module.scss';
 import { NotificationContext } from '../../App';
 import ConfirmationPane from '../../components/ConfirmationPane';
-import { DashRoute, UploadAreaRoute, VotingAreaRoute } from '../../Routes';
+import { DashRoute, SearchRoute, UploadAreaRoute, VotingAreaRoute } from '../../Routes';
 import { useParams } from 'react-router-dom';
 import AuthFilter from '../../components/AuthFilter';
 import SubmitButton from '../../components/SubmitButton';
 import BallotWallet from '../../contracts/BallotWallet';
-import { BigNumber } from 'ethers';
+import Search from '../../services/search';
+import MainFeatureIcon from '../../components/MainFeatureIcon';
 
 const VotingArea = () => {
     const web3 = useContext(Web3Context);
-    const { group, id } = useParams();
+    const { group } = useParams();
     const pushNotification = useContext(NotificationContext);
     const [loaded, setLoaded] = useState(false);
     const [ipfs, setIPFS] = useState<IPFS>();
     const [action, setAction] = useState<number>();
     const [waiting, setWaiting] = useState(false);
-    const [peeking, setPeeking] = useState(false);
+    const [actionProps, setActionProps] = useState<{
+        method?: string,
+        data?: any,
+        voted: boolean,
+        executed: boolean,
+        cancelled: boolean,
+    }>();
 
     useEffect(() => {
         if (loaded) {
-            setIPFS(IPFS.create(process.env.REACT_APP_IPFS_URL));
-            if (id && !Number.isNaN(parseInt(id))) {
-                setAction(parseInt(id));
-            }
+            setIPFS(IPFS.create());
         }
-    }, [loaded, group, id]);
+    }, [loaded, group]);
 
     const handleError = (err: any) => {
         pushNotification({
-            title: 'Whoops!',
+            title: 'Ối!',
             message: web3.getRevertReason(err?.message),
             type: 'error',
         });
@@ -45,34 +48,62 @@ const VotingArea = () => {
 
     const handleSuccess = (data?: any) => {
         pushNotification({
-            title: 'Successfully!',
+            title: 'Quá tuyệt vời!',
             message: data,
             type: 'success',
         });
     }
 
+    const validate = async (actionId: number, method: string) => {
+        const result = await Search.forCollection('actions', {
+            group: group,
+            id: actionId,
+        });
+        if (result.length) {
+            const existed = result[0] as {
+                voted: boolean,
+                executed: boolean,
+                cancelled: boolean,
+            };
+            return {
+                method: method,
+                voted: existed.voted,
+                executed: existed.executed,
+                cancelled: existed.cancelled,
+            };
+        }
+    };
+
     const peek = async () => {
         try {
             if (group && Number.isInteger(action)) {
-                setPeeking(true);
                 const contract = BallotWallet.attach(group, web3);
                 const result = await contract.peek(Number(action));
-                const contents = [] as {
-                    cid: string,
-                    tag?: number,
-                }[];
-                result.decodedData.inputs.forEach((input) => {
-                    contents.push({
-                        cid: (input || [])[0] as string,
-                        tag: ((input || [])[1] as BigNumber).toNumber(),
-                    });
-                });
-
-                console.log(contents);
+                setActionProps(await validate(
+                    Number(action),
+                    result.decodedData.method,
+                ));
             }
         } catch (err: any) {
             handleError(err);
+            setActionProps(undefined);
         }
+    };
+
+    const peekingDescriptions = () => {
+        const descriptions = [] as string[];
+        if (actionProps) {
+            if (actionProps.voted) {
+                descriptions.push('Bạn đã bỏ phiếu cho hành động này.');
+            }
+            if (actionProps.executed) {
+                descriptions.push('Hành động này đã được thực thi.');
+            }
+            if (actionProps.cancelled) {
+                descriptions.push('Hành động này đã bị huỷ.');
+            }
+        }
+        return descriptions;
     };
 
     const vote = async (affirmed: boolean) => {
@@ -80,12 +111,13 @@ const VotingArea = () => {
         try {
             if (group && Number.isInteger(action)) {
                 await web3.send(group, 'vote', ['uint256', 'bool'], action, affirmed);
-                handleSuccess(`Action ${action} has been voted.`);
+                handleSuccess(`Đã bỏ phiếu cho hành động ${action}.`);
             }
         } catch (err: any) {
             handleError(err);
         }
         setAction(undefined);
+        setActionProps(undefined);
         setWaiting(false);
     };
 
@@ -103,12 +135,16 @@ const VotingArea = () => {
                 links={[
                     DashRoute,
                     {
+                        path: SearchRoute.path.replace(':group', group || ''),
+                        text: SearchRoute.text,
+                    },
+                    {
                         path: VotingAreaRoute.path.replace(':group', group || ''),
-                        text: 'Vote',
+                        text: VotingAreaRoute.text,
                     },
                     {
                         path: UploadAreaRoute.path.replace(':group', group || ''),
-                        text: 'Upload',
+                        text: UploadAreaRoute.text,
                     },
                 ]}
             />
@@ -120,9 +156,8 @@ const VotingArea = () => {
                 <>
                     <div className={styles.container}>
                         <SimpleInput
-                            locked={id !== undefined}
-                            placeholder={id || 'What action do you want to vote?'}
-                            onChange={(text: string) => {
+                            placeholder={'Bạn muốn bỏ phiếu cho hành động nào?'}
+                            onChange={async (text: string) => {
                                 const parsed = parseInt(text);
                                 if (Number.isInteger(parsed)) {
                                     setAction(parsed);
@@ -134,25 +169,32 @@ const VotingArea = () => {
                         {action !== undefined && (
                             <>
                                 <SubmitButton
-                                    title={'Peek'}
+                                    title={'Tra cứu!'}
                                     onClick={peek}
                                 />
-                                <div className={styles.submit}>
-                                    <ConfirmationPane
-                                        onConfirm={agree}
-                                        onReject={disagree}
-                                    />
-                                </div>
+                                {actionProps !== undefined && (
+                                    <>
+                                        <MainFeatureIcon
+                                            title={actionProps.method || 'unknown'}
+                                            descriptions={peekingDescriptions()}
+                                        />
+                                        {!actionProps.voted && !actionProps.executed && !actionProps.cancelled && (
+                                            <div className={styles.submit}>
+                                                <ConfirmationPane
+                                                    onConfirm={agree}
+                                                    onReject={disagree}
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                             </>
                         )}
                     </div>
-                    {peeking && (
-                        <></>
-                    )}
                     {waiting && <WaitingForTransaction />}
                 </>
             )}
-            {loaded && !ipfs && <LoadingComponent text={'Connecting to IPFS...'} />}
+            {loaded && !ipfs && <LoadingComponent text={'Đang kết nối với IPFS...'} />}
         </>
     );
 };

@@ -13,14 +13,14 @@ const ConfirmationPane = (props: ConfirmationButtonProps) => {
             <div className={styles.button}>
                 <ConfirmationButton
                     onClick={props.onConfirm}
-                    title={'Confirm'}
+                    title={'Đồng ý'}
                     confirm={true}
                 />
             </div>
             <div className={styles.button}>
                 <ConfirmationButton
                     onClick={props.onReject}
-                    title={'Reject'}
+                    title={'Từ chối'}
                     confirm={false}
                 />
             </div>

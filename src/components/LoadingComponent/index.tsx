@@ -9,8 +9,8 @@ interface LoadingComponentProps {
 }
 
 const LoadingComponent = (props: LoadingComponentProps) => {
-    const defaultText = 'Loading...';
-    const defaultCancelText = 'Cancel';
+    const defaultText = 'Vui lòng chờ...';
+    const defaultCancelText = 'Huỷ!';
 
     return (
         <div className={styles.container}>

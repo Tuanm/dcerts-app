@@ -28,13 +28,9 @@ export default class BallotWallet {
             executed: boolean,
             cancelled: boolean,
         };
-        const { method, inputs } = this.decodeData(result.data);
         return {
             ...result,
-            decodedData: {
-                method,
-                inputs: inputs[0] as [],
-            },
+            decodedData: this.decodeData(result.data),
         };
     }
 
@@ -50,5 +46,37 @@ export default class BallotWallet {
             } catch {};
         }
         throw new Error('Action unidentified');
+    }
+
+    static parseAddBatch(inputs: ethers.utils.Result) {
+        const result = [] as {
+            cid: string,
+            tag: number,
+        }[];
+        for (const input of (inputs[0] || [])) {
+            const cid = input[0] as string;
+            const tag = input[1] as BigNumber;
+            result.push({
+                cid: cid,
+                tag: tag.toNumber(),
+            });
+        }
+        return result;
+    }
+
+    static parseLockBatch(inputs: ethers.utils.Result) {
+        return (inputs[0] as BigNumber).toNumber();
+    }
+
+    static parseUnlockBatch(inputs: ethers.utils.Result) {
+        return (inputs[0] as BigNumber).toNumber();
+    }
+
+    static parseLockContent(inputs: ethers.utils.Result) {
+        return (inputs[0] as BigNumber).toNumber();
+    }
+
+    static parseUnlockContent(inputs: ethers.utils.Result) {
+        return (inputs[0] as BigNumber).toNumber();
     }
 }

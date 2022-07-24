@@ -9,12 +9,12 @@ import NewsIcon from '../../components/NewsIcon';
 import SelectionPane from '../../components/SelectionPane';
 import SubmitButton from '../../components/SubmitButton';
 import WaitingForTransaction from '../../components/WaitingForTransaction';
-import { DashRoute, UploadAreaRoute, VotingAreaRoute, WithIdVotingAreaRoute } from '../../Routes';
+import { DashRoute, SearchRoute, UploadAreaRoute, VotingAreaRoute } from '../../Routes';
 import styles from './index.module.scss';
 
 const SearchTypes = {
-    ACTION: 'Action',
-    CONTENT: 'Content',
+    ACTION: 'Hành động',
+    CONTENT: 'Nội dung',
 };
 
 const Collections = {
@@ -25,19 +25,19 @@ const Collections = {
 const Queries = {
     ACTION: [
         {
-            name: 'Not executed',
+            name: 'Chưa thực thi',
             value: {
                 executed: false,
             },
         },
         {
-            name: 'Executed',
+            name: 'Đã thực thi',
             value: {
                 executed: true,
             },
         },
         {
-            name: 'Cancelled',
+            name: 'Đã huỷ',
             value: {
                 cancelled: true,
             },
@@ -45,13 +45,13 @@ const Queries = {
     ],
     CONTENT: [
         {
-            name: 'Locked',
+            name: 'Đã khoá',
             value: {
                 locked: true,
             },
         },
         {
-            name: 'Not locked',
+            name: 'Chưa khoá',
             value: {
                 locked: false,
             },
@@ -66,21 +66,24 @@ const Search = () => {
     const [searching, setSearching] = useState(false);
     const [collection, setCollection] = useState<string>();
     const [query, setQuery] = useState({});
-    const [result, setResult] = useState<{ id: number }[]>([]);
+    const [result, setResult] = useState<{
+        id: number,
+        [key: string]: any
+    }[]>([]);
     const navigate = useNavigate();
 
     const search = async () => {
         setSearching(true);
         try {
             if (!collection) {
-                throw new Error('You must choose a type of searching!');
+                throw new Error('Vui lòng chọn nội dung bạn muốn tìm kiếm!');
             }
             const data = await SearchAPI.forCollection(collection, query) as { id: number }[];
             setResult(data);
-            if (data.length === 0) throw new Error('Not found!');
+            if (data.length === 0) throw new Error('Không tìm thấy!');
         } catch (err: any) {
             pushNotification({
-                title: 'Whoops!',
+                title: 'Ối!',
                 message: err?.message,
                 type: 'error',
             });
@@ -88,20 +91,16 @@ const Search = () => {
         setSearching(false);
     };
 
-    const enterVoteArea = (action: any) => {
-        navigate(WithIdVotingAreaRoute.path.replace(':group', group || '').replace(':id', action));
-    };
-
-    const peekContent = (contentId: any) => {
-        // TODO: Display content
-    };
-
     const click = (id: any) => {
+        let url;
         if (collection === Collections.ACTION) {
-            return enterVoteArea(id);
+            url = `/${group}/actions/${id}`;
         }
         if (collection === Collections.CONTENT) {
-            return peekContent(id);
+            url = `/contents/${id}`;
+        }
+        if (url !== undefined) {
+            window.open(window.location.origin + url, '_blank', 'popup=true');
         }
     };
 
@@ -111,12 +110,16 @@ const Search = () => {
                 links={[
                     DashRoute,
                     {
+                        path: SearchRoute.path.replace(':group', group || ''),
+                        text: SearchRoute.text,
+                    },
+                    {
                         path: VotingAreaRoute.path.replace(':group', group || ''),
-                        text: 'Vote',
+                        text: VotingAreaRoute.text,
                     },
                     {
                         path: UploadAreaRoute.path.replace(':group', group || ''),
-                        text: 'Upload',
+                        text: UploadAreaRoute.text,
                     },
                 ]}
             />
@@ -127,7 +130,7 @@ const Search = () => {
             {loaded && (
                 <div className={styles.container}>
                     <DropDownMenu
-                        text={'What are you searching for?'}
+                        text={'Bạn muốn tra cứu gì?'}
                         options={[
                             SearchTypes.ACTION,
                             SearchTypes.CONTENT,
@@ -142,7 +145,7 @@ const Search = () => {
                     />
                     {collection === Collections.ACTION && (
                         <SelectionPane
-                            text={'Choose some filters...'}
+                            text={'Bạn có thể chọn bộ lọc để tra cứu'}
                             options={[...Queries.ACTION.map((action) => action.name)]}
                             onOptionsChanged={(...options: string[]) => {
                                 setQuery({});
@@ -159,7 +162,7 @@ const Search = () => {
                     )}
                     {collection === Collections.CONTENT && (
                         <SelectionPane
-                            text={'Choose some filters...'}
+                            text={'Bạn có thể chọn bộ lọc để tra cứu'}
                             options={[...Queries.CONTENT.map((content) => content.name)]}
                             onOptionsChanged={(...options: string[]) => {
                                 setQuery({});
@@ -175,14 +178,17 @@ const Search = () => {
                         />
                     )}
                     <SubmitButton
-                        title={'Search!'}
+                        title={'Tra cứu!'}
                         onClick={search}
                     />
                     {result.length > 0 && (result.map((res, index) => (
                         <NewsIcon
                             key={index}
                             title={res.id.toString()}
+                            hoverTitle={'Xem chi tiết!'}
                             onClick={() => click(res.id)}
+                            highlight={collection === Collections.ACTION && res.executed}
+                            warnable={collection === Collections.ACTION && res.cancelled}
                         />
                     )))}
                 </div>

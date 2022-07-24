@@ -7,8 +7,13 @@ export default class IPFS {
         this.client = client;
     }
 
-    static create(url?: string) {
-        return new IPFS(create({ url }));
+    static create() {
+        return new IPFS(create({
+            url: process.env.REACT_APP_IPFS_URL,
+            headers: {
+                authorization: process.env.REACT_APP_IPFS_AUTHORIZATION || '',
+            }
+        }));
     }
 
     async add(content: any) {

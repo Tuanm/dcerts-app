@@ -3,6 +3,7 @@ import { useRoutes } from 'react-router-dom';
 import Dashboard from './screens/Dashboard';
 import Home from './screens/Home';
 import NotFound from './screens/NotFound';
+import PeekingActionArea from './screens/PeekingActionArea';
 import Search from './screens/Search';
 import Test from './screens/Test';
 import UploadArea from './screens/UploadArea';
@@ -15,43 +16,43 @@ export const TestRoute = {
 };
 
 export const HomeRoute = {
-    text: 'Home',
+    text: 'Trang chủ',
     path: '/',
     element: <Home />,
 };
 
 export const DashRoute = {
-    text: 'Dashboard',
+    text: 'Trang chủ',
     path: '/dash',
     element: <Dashboard />,
 };
 
 export const SearchRoute = {
-    text: 'Search',
+    text: 'Tra cứu',
     path: '/:group/search',
     element: <Search />,
 };
 
 export const UploadAreaRoute = {
-    text: 'Upload',
+    text: 'Cấp phát',
     path: '/:group/add',
     element: <UploadArea />,
 };
 
 export const VotingAreaRoute = {
-    text: 'Vote',
+    text: 'Bỏ phiếu',
     path: '/:group/vote',
     element: <VotingArea />,
 };
 
-export const WithIdVotingAreaRoute = {
-    text: 'Vote',
-    path: '/:group/vote/:id',
-    element: <VotingArea />,
+export const PeekingActionAreaRoute = {
+    text: 'Xem hành động',
+    path: '/:group/actions/:id',
+    element: <PeekingActionArea />
 };
 
 export const NotFoundRoute = {
-    text: 'Not Found',
+    text: 'Không tìm thấy',
     path: '*',
     element: <NotFound />,
 };
@@ -64,7 +65,7 @@ const Routes = () => {
         SearchRoute,
         UploadAreaRoute,
         VotingAreaRoute,
-        WithIdVotingAreaRoute,
+        PeekingActionAreaRoute,
         NotFoundRoute, // let it be the last route
     ]);
 
