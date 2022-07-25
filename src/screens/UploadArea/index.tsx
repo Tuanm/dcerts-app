@@ -24,14 +24,18 @@ const UploadArea = () => {
     const [waiting, setWaiting] = useState(false);
     const [peeking, setPeeking] = useState(false);
     const [peekingContent, setPeekingContent] = useState<{
-        id: number,
+        id: string,
         title: string,
         content: {
+            tag: string,
             type: string,
             data: any,
         },
     }>();
-    const [files, setFiles] = useState<File[]>([]);
+    const [files, setFiles] = useState<{
+        text: string,
+        tag: string,
+    }[]>([]);
 
     useEffect(() => {
         if (loaded) {
@@ -55,10 +59,6 @@ const UploadArea = () => {
         });
     };
 
-    const getTagFromFileName = (file: File) => {
-        return file.name.substring(0, file.name.lastIndexOf('.'));
-    };
-
     const upload = async () => {
         setWaiting(true);
         try {
@@ -67,9 +67,7 @@ const UploadArea = () => {
                     cid: string,
                     tag: string,
                 }[];
-                for (const file of files) {
-                    const tag = getTagFromFileName(file);
-                    const text = await file.text();
+                for (const { text, tag } of files) {
                     const cid = (await ipfs.add(text)).toV1().toString();
                     contents.push({ cid, tag });
                 }
@@ -114,14 +112,26 @@ const UploadArea = () => {
                         <SimpleInput
                             type={'file'}
                             placeholder={'Thêm nội dung!'}
-                            onChange={(fileList: FileList) => {
+                            onChange={async (fileList: FileList) => {
                                 try {
                                     for (const file of Array.from(fileList)) {
                                         if (file.type !== 'application/json') {
-                                            throw new Error('Chỉ chấp nhận tệp tin có định dạng JSON!');
+                                            throw new Error('Chỉ chấp nhận tập tin có định dạng JSON!');
                                         }
                                     }
-                                    setFiles([...files, ...Array.from(fileList)]);
+                                    const newFiles = [] as {
+                                        text: string,
+                                        tag: string,
+                                    }[];
+                                    for (const file of Array.from(fileList)) {
+                                        const text = await file.text();
+                                        const tag = JSON.parse(text).tag;
+                                        newFiles.push({
+                                            text,
+                                            tag,
+                                        });
+                                    }
+                                    setFiles([...files, ...newFiles]);
                                     setUploaded(true);
                                 } catch (err: any) {
                                     handleError(err);
@@ -134,15 +144,16 @@ const UploadArea = () => {
                                 {files.map((file, index) => (
                                     <NewsIcon
                                         key={index}
-                                        title={file.name.replace(/.json$/, '')}
+                                        title={`#${file.tag}`}
                                         hoverTitle={'Xem chi tiết!'}
-                                        onClick={async () => {
-                                            const content = JSON.parse((await file.text()).replaceAll(/[\r\n]/g, '')) as {
+                                        onClick={() => {
+                                            const content = JSON.parse(file.text.replaceAll(/[\r\n]/g, '')) as {
+                                                tag: string,
                                                 type: string,
                                                 data: any,
                                             };
                                             setPeekingContent({
-                                                id: parseInt(getTagFromFileName(file)),
+                                                id: content.tag,
                                                 title: content.type,
                                                 content: content,
                                             });

@@ -6,7 +6,6 @@ import API from '../../services';
 import Wall from '../../services/wall';
 import GoBackIcon from '../GoBackIcon';
 import LoadingComponent from '../LoadingComponent';
-import LogoutButton from '../LogoutButton';
 
 interface AuthProps {
     setLoaded: (loaded: boolean) => void,
@@ -15,6 +14,7 @@ interface AuthProps {
     successUrl?: string,
     group?: string,
     interval?: number,
+    noButtons?: boolean,
 }
 
 const AuthMessages = {
@@ -123,14 +123,11 @@ const AuthFilter = (props: AuthProps) => {
                     text={'Vui lòng đợi...'}
                 />
             )}
-            {authorized && (
-                <>
-                    <GoBackIcon
-                        text={'Quay lại'}
-                        onClick={() => navigate(-1)}
-                    />
-                    {/* <LogoutButton /> */}
-                </>
+            {authorized && !props.noButtons && (
+                <GoBackIcon
+                    text={'Quay lại'}
+                    onClick={() => navigate(-1)}
+                />
             )}
         </>
     );

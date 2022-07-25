@@ -54,6 +54,7 @@ const App = () => {
                 setLoaded={() => {}}
                 successUrl={DashRoute.path}
                 interval={5000}
+                noButtons={true}
             />
             <Web3>
                 <div className={'container'}>

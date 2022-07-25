@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthFilter from '../../components/AuthFilter';
 import DropDownMenu from '../../components/DropDownMenu';
-import NavigationBar from '../../components/NavigationBar';
 import SubmitButton from '../../components/SubmitButton';
-import { DashRoute, SearchRoute } from '../../Routes';
+import { SearchRoute } from '../../Routes';
 import styles from './index.module.scss';
 
 const Dashboard = () => {
@@ -19,14 +18,10 @@ const Dashboard = () => {
 
     return (
         <>
-            <NavigationBar
-                links={[
-                    DashRoute,
-                ]}
-            />
             <AuthFilter
                 setLoaded={setLoaded}
                 setGroups={setGroups}
+                noButtons={true}
             />
             {loaded && (
                 <div className={styles.container}>

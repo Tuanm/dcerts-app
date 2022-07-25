@@ -3,7 +3,7 @@ import { useRoutes } from 'react-router-dom';
 import Dashboard from './screens/Dashboard';
 import Home from './screens/Home';
 import NotFound from './screens/NotFound';
-import PeekingActionArea from './screens/PeekingActionArea';
+import PeekingArea from './screens/PeekingArea';
 import Search from './screens/Search';
 import Test from './screens/Test';
 import UploadArea from './screens/UploadArea';
@@ -45,10 +45,10 @@ export const VotingAreaRoute = {
     element: <VotingArea />,
 };
 
-export const PeekingActionAreaRoute = {
+export const PeekingAreaRoute = {
     text: 'Xem hành động',
-    path: '/:group/actions/:id',
-    element: <PeekingActionArea />
+    path: '/:group/peek/:id',
+    element: <PeekingArea />
 };
 
 export const NotFoundRoute = {
@@ -65,7 +65,7 @@ const Routes = () => {
         SearchRoute,
         UploadAreaRoute,
         VotingAreaRoute,
-        PeekingActionAreaRoute,
+        PeekingAreaRoute,
         NotFoundRoute, // let it be the last route
     ]);
 

@@ -6,5 +6,9 @@
         "addBatch": ["(string,string)[]"],
         "lockBatch": ["uint256"],
         "unlockBatch": ["uint256"]
-    }
+    },
+    "abi": [
+        "function get(uint256 _id) public view returns ((uint256 id, uint256 timestamp, address author, bool locked, string tag, string cid) memory)",
+        "function getBatch(uint256 _batchId) public view returns ((uint256 id, uint256 timestamp, address author, bool locked, string tag, string cid)[] memory)"
+    ]
 }

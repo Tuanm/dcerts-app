@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
+import TextShortCut from '../TextShortCut';
 import styles from './index.module.scss';
 
 interface ContentAreaProps {
-    id: number;
+    id: string;
     title: string;
     content?: {
         type: string,
@@ -17,21 +18,39 @@ interface ContentProps {
 }
 
 const Content = (props: ContentProps) => {
+    const [hidden, setHidden] = useState<{
+        [key: string]: boolean,
+    }>({});
+
     return (
         <div className={styles.text} style={{
-            marginLeft: `${props.depth * 10}%`,
+            marginLeft: `${props.depth * 6.9}%`,
         }}>
             {props.data && Object.keys(props.data).map((key, index) => (
                 <div key={index}>
-                    {`${key}: `}
                     {props.data[key] !== Object(props.data[key]) && (
-                        <>{props.data[key]}</>
+                        <>{`${key}: `}{props.data[key]}</>
                     )}
                     {props.data[key] === Object(props.data[key]) && (
-                        <Content
-                            depth={props.depth + 1}
-                            data={props.data[key]}
-                        />
+                        <>
+                            <TextShortCut
+                                text={`${key}: `}
+                                onClick={() => {
+                                    const current = { ...hidden };
+                                    current[key] = !current[key];
+                                    setHidden({ ...current });
+                                }}
+                            />
+                            {!hidden[key] && (
+                                <Content
+                                    depth={props.depth + 1}
+                                    data={props.data[key]}
+                                />
+                            )}
+                            {!!hidden[key] && (
+                                <>{'[...]'}</>
+                            )}
+                        </>
                     )}
                 </div>
             ))}

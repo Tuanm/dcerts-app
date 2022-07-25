@@ -9,8 +9,8 @@ export default class BallotWallet {
     private web3: Web3;
 
     private constructor(address: string, web3: Web3) {
-        this.contract = new ethers.Contract(address, new ethers.utils.Interface(abi), web3.getProvider());
         this.web3 = web3;
+        this.contract = this.web3.contract(address, abi);
     }
 
     static attach(address: string, web3: Web3) {
@@ -51,14 +51,14 @@ export default class BallotWallet {
     static parseAddBatch(inputs: ethers.utils.Result) {
         const result = [] as {
             cid: string,
-            tag: number,
+            tag: string,
         }[];
         for (const input of (inputs[0] || [])) {
             const cid = input[0] as string;
-            const tag = input[1] as BigNumber;
+            const tag = input[1] as string;
             result.push({
-                cid: cid,
-                tag: tag.toNumber(),
+                cid,
+                tag,
             });
         }
         return result;
