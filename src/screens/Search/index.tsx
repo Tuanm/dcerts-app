@@ -9,13 +9,14 @@ import NewsIcon from '../../components/NewsIcon';
 import SelectionPane from '../../components/SelectionPane';
 import SubmitButton from '../../components/SubmitButton';
 import WaitingForTransaction from '../../components/WaitingForTransaction';
-import { DashRoute, SearchRoute, UploadAreaRoute, VotingAreaRoute } from '../../Routes';
+import { DashRoute, SearchRoute, UploadAreaRoute } from '../../Routes';
 import styles from './index.module.scss';
 import Pagination from '../../components/Pagination';
 import ContentArea from '../../components/ContentArea';
 import ContentPool from '../../contracts/ContentPool';
 import { Web3Context } from '../../components/Web3';
 import IPFS from '../../services/ipfs';
+import SimpleInput from '../../components/SimpleInput';
 
 const SearchTypes = {
     ACTION: 'Hành động',
@@ -149,6 +150,7 @@ const Search = () => {
             window.open(window.location.origin + `/${group}/peek/${id}`, '_blank', 'popup=true');
         }
         if (collection === Collections.CONTENT) {
+            window.open(window.location.origin + `/${group}/lock/${id}`, '_blank', 'popup=true');
             (async () => {
                 try {
                     const pool = contentPool();
@@ -181,10 +183,6 @@ const Search = () => {
                         text: SearchRoute.text,
                     },
                     {
-                        path: VotingAreaRoute.path.replace(':group', group || ''),
-                        text: VotingAreaRoute.text,
-                    },
-                    {
                         path: UploadAreaRoute.path.replace(':group', group || ''),
                         text: UploadAreaRoute.text,
                     },
@@ -212,9 +210,20 @@ const Search = () => {
                             }
                         }}
                     />
+                    {collection !== undefined && (
+                        <SimpleInput
+                            placeholder={'Định danh tìm kiếm'}
+                            onChange={(value) => {
+                                setQuery({
+                                    ...query,
+                                    id: value === '' ? undefined : value,
+                                });
+                            }}
+                        />
+                    )}
                     {collection === Collections.ACTION && (
                         <SelectionPane
-                            text={'Bạn có thể chọn bộ lọc để tra cứu'}
+                            text={'Bộ lọc khác'}
                             options={[...Queries.ACTION.map((action) => action.name)]}
                             onOptionsChanged={(...options: string[]) => {
                                 setQuery({});
@@ -230,21 +239,32 @@ const Search = () => {
                         />
                     )}
                     {collection === Collections.CONTENT && (
-                        <SelectionPane
-                            text={'Bạn có thể chọn bộ lọc để tra cứu'}
-                            options={[...Queries.CONTENT.map((content) => content.name)]}
-                            onOptionsChanged={(...options: string[]) => {
-                                setQuery({});
-                                for (const content of Queries.CONTENT) {
-                                    if (options.includes(content.name)) {
-                                        setQuery({
-                                            ...query,
-                                            ...content.value,
-                                        });
+                        <>
+                            <SimpleInput
+                                placeholder={'Tên thẻ của nội dung'}
+                                onChange={(value) => {
+                                    setQuery({
+                                        ...query,
+                                        tag: value === '' ? undefined : value,
+                                    });
+                                }}
+                            />
+                            <SelectionPane
+                                text={'Bộ lọc khác'}
+                                options={[...Queries.CONTENT.map((content) => content.name)]}
+                                onOptionsChanged={(...options: string[]) => {
+                                    setQuery({});
+                                    for (const content of Queries.CONTENT) {
+                                        if (options.includes(content.name)) {
+                                            setQuery({
+                                                ...query,
+                                                ...content.value,
+                                            });
+                                        }
                                     }
-                                }
-                            }}
-                        />
+                                }}
+                            />
+                        </>
                     )}
                     <SubmitButton
                         title={'Tra cứu!'}

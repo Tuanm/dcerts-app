@@ -2,18 +2,13 @@ import React from 'react';
 import { useRoutes } from 'react-router-dom';
 import Dashboard from './screens/Dashboard';
 import Home from './screens/Home';
+import LockingArea from './screens/LockingArea';
 import NotFound from './screens/NotFound';
 import PeekingArea from './screens/PeekingArea';
+import PreviewArea from './screens/PreviewArea';
 import Search from './screens/Search';
-import Test from './screens/Test';
 import UploadArea from './screens/UploadArea';
 import VotingArea from './screens/VotingArea';
-
-export const TestRoute = {
-    text: 'Test',
-    path: '/test',
-    element: <Test />,
-};
 
 export const HomeRoute = {
     text: 'Trang chủ',
@@ -51,6 +46,18 @@ export const PeekingAreaRoute = {
     element: <PeekingArea />
 };
 
+export const LockingAreaRoute = {
+    text: 'Khoá nội dung',
+    path: '/:group/lock/:id',
+    element: <LockingArea />,
+};
+
+export const PreviewAreaRoute = {
+    text: 'Xem nội dung',
+    path: '/preview/:cid',
+    element: <PreviewArea />,
+};
+
 export const NotFoundRoute = {
     text: 'Không tìm thấy',
     path: '*',
@@ -59,13 +66,14 @@ export const NotFoundRoute = {
 
 const Routes = () => {
     const routes = useRoutes([
-        TestRoute,
         HomeRoute,
         DashRoute,
         SearchRoute,
         UploadAreaRoute,
         VotingAreaRoute,
         PeekingAreaRoute,
+        LockingAreaRoute,
+        PreviewAreaRoute,
         NotFoundRoute, // let it be the last route
     ]);
 

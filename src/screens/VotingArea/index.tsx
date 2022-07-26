@@ -4,7 +4,7 @@ import NavigationBar from '../../components/NavigationBar';
 import SimpleInput from '../../components/SimpleInput';
 import IPFS from '../../utils/ipfs';
 import styles from './index.module.scss';
-import { DashRoute, SearchRoute, UploadAreaRoute, VotingAreaRoute } from '../../Routes';
+import { DashRoute, SearchRoute, UploadAreaRoute } from '../../Routes';
 import { useParams } from 'react-router-dom';
 import AuthFilter from '../../components/AuthFilter';
 import SubmitButton from '../../components/SubmitButton';
@@ -33,10 +33,6 @@ const VotingArea = () => {
                     {
                         path: SearchRoute.path.replace(':group', group || ''),
                         text: SearchRoute.text,
-                    },
-                    {
-                        path: VotingAreaRoute.path.replace(':group', group || ''),
-                        text: VotingAreaRoute.text,
                     },
                     {
                         path: UploadAreaRoute.path.replace(':group', group || ''),

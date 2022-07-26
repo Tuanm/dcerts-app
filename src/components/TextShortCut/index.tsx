@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.scss';
 
@@ -8,10 +8,15 @@ interface TextShortCutProps {
     to?: string;
     url?: string;
     onClick?: () => void;
+    onLoad?: () => void;
 }
 
 const TextShortCut = (props: TextShortCutProps) => {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (props.onLoad) props.onLoad();
+    }, []);
 
     return (
         <>

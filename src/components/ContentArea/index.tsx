@@ -22,6 +22,12 @@ const Content = (props: ContentProps) => {
         [key: string]: boolean,
     }>({});
 
+    const hide = (key: string) => {
+        const current = { ...hidden };
+        current[key] = !current[key];
+        setHidden({ ...current });
+    };
+
     return (
         <div className={styles.text} style={{
             marginLeft: `${props.depth * 6.9}%`,
@@ -36,9 +42,10 @@ const Content = (props: ContentProps) => {
                             <TextShortCut
                                 text={`${key}: `}
                                 onClick={() => {
-                                    const current = { ...hidden };
-                                    current[key] = !current[key];
-                                    setHidden({ ...current });
+                                    hide(key);
+                                }}
+                                onLoad={() => {
+                                    hide(key);
                                 }}
                             />
                             {!hidden[key] && (

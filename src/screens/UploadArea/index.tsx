@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react';
-import ContentArea from '../../components/ContentArea';
 import LoadingComponent from '../../components/LoadingComponent';
 import NavigationBar from '../../components/NavigationBar';
 import NewsIcon from '../../components/NewsIcon';
@@ -10,7 +9,7 @@ import { Web3Context } from '../../components/Web3';
 import IPFS from '../../utils/ipfs';
 import styles from './index.module.scss';
 import { NotificationContext } from '../../App';
-import { DashRoute, SearchRoute, UploadAreaRoute, VotingAreaRoute } from '../../Routes';
+import { DashRoute, SearchRoute, UploadAreaRoute } from '../../Routes';
 import AuthFilter from '../../components/AuthFilter';
 import { useParams } from 'react-router-dom';
 
@@ -22,16 +21,6 @@ const UploadArea = () => {
     const [ipfs, setIPFS] = useState<IPFS>();
     const [uploaded, setUploaded] = useState(false);
     const [waiting, setWaiting] = useState(false);
-    const [peeking, setPeeking] = useState(false);
-    const [peekingContent, setPeekingContent] = useState<{
-        id: string,
-        title: string,
-        content: {
-            tag: string,
-            type: string,
-            data: any,
-        },
-    }>();
     const [files, setFiles] = useState<{
         text: string,
         tag: string,
@@ -59,6 +48,21 @@ const UploadArea = () => {
         });
     };
 
+    const addToIPFS = async (text: string) => {
+        if (ipfs) {
+            return (await ipfs.add(text)).toV1().toString();
+        } else throw new Error('Có lỗi xảy ra!');
+    };
+
+    const preview = async (text: string) => {
+        try {
+            const cid = await addToIPFS(text);
+            window.open(window.location.origin + `/preview/${cid}`, '_blank', 'popup=true');
+        } catch (err: any) {
+            handleError(err);
+        }
+    };
+
     const upload = async () => {
         setWaiting(true);
         try {
@@ -68,7 +72,7 @@ const UploadArea = () => {
                     tag: string,
                 }[];
                 for (const { text, tag } of files) {
-                    const cid = (await ipfs.add(text)).toV1().toString();
+                    const cid = await addToIPFS(text);
                     contents.push({ cid, tag });
                 }
                 await web3.send(group, 'addBatch', ['(string,string)[]'], [
@@ -91,10 +95,6 @@ const UploadArea = () => {
                     {
                         path: SearchRoute.path.replace(':group', group || ''),
                         text: SearchRoute.text,
-                    },
-                    {
-                        path: VotingAreaRoute.path.replace(':group', group || ''),
-                        text: VotingAreaRoute.text,
                     },
                     {
                         path: UploadAreaRoute.path.replace(':group', group || ''),
@@ -146,18 +146,8 @@ const UploadArea = () => {
                                         key={index}
                                         title={`#${file.tag}`}
                                         hoverTitle={'Xem chi tiết!'}
-                                        onClick={() => {
-                                            const content = JSON.parse(file.text.replaceAll(/[\r\n]/g, '')) as {
-                                                tag: string,
-                                                type: string,
-                                                data: any,
-                                            };
-                                            setPeekingContent({
-                                                id: content.tag,
-                                                title: content.type,
-                                                content: content,
-                                            });
-                                            setPeeking(true);
+                                        onClick={async () => {
+                                            await preview(file.text);
                                         }}
                                         onDelete={() => {
                                             const allFiles = [...files];
@@ -174,17 +164,6 @@ const UploadArea = () => {
                             </div>
                         )}
                     </div>
-                    {peeking && peekingContent !== undefined && (
-                        <WaitingForTransaction
-                            onClickOut={() => setPeeking(false)}
-                        >
-                            <ContentArea
-                                id={peekingContent.id}
-                                title={peekingContent.title}
-                                content={peekingContent.content}
-                            />
-                        </WaitingForTransaction>
-                    )}
                     {waiting && <WaitingForTransaction />}
                 </>
             )}

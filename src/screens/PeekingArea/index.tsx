@@ -11,6 +11,7 @@ import { Web3Context } from '../../components/Web3';
 import BallotWallet from '../../contracts/BallotWallet';
 import ContentPool from '../../contracts/ContentPool';
 import IPFS from '../../services/ipfs';
+import Search from '../../services/search';
 import styles from './index.module.scss';
 
 enum Actions {
@@ -36,18 +37,21 @@ const PeekingArea = () => {
             data: any,
         };
     }[]>([]);
+    const [actionText, setActionText] = useState<string>();
     const [loading, setLoading] = useState(false);
     const [waiting, setWaiting] = useState(false);
+    const [actionProperties, setActionProperties] = useState({
+        executed: false,
+        cancelled: false,
+    });
     const navigate = useNavigate();
 
     const isPopUp = () => window.opener && window.opener !== window;
 
     const contentPool = () => {
-        if (process.env.REACT_APP_CONTENT_POOL_ADDRESS) {
-            return ContentPool.attach(
-                process.env.REACT_APP_CONTENT_POOL_ADDRESS,
-                web3,
-            );
+        const poolAddress = process.env.REACT_APP_CONTENT_POOL_ADDRESS;
+        if (poolAddress) {
+            return ContentPool.attach(poolAddress, web3);
         } else {
             throw new Error('Không kết nối được đến kho lưu trữ nội dung.');
         }
@@ -89,15 +93,28 @@ const PeekingArea = () => {
         setWaiting(false);
     };
 
+    const actionProps = async (actionId: number) => {
+        const found = await Search.forCollection('actions', {
+            group,
+            id: actionId,
+        });
+        if (found.data.length) {
+            return found.data[0] as {
+                executed: boolean,
+                cancelled: boolean,
+            };
+        } else throw new Error('Không tìm thấy!');
+    };
+
     useEffect(() => {
+        if (!isPopUp()) {
+            navigate(-1);
+        }
         (async () => {
             setLoading(true);
             try {
-                if (!isPopUp()) {
-                    setLoaded(false);
-                    throw new Error('Có gì đó sai sai!?');
-                }
                 if (group && Number.isInteger(Number(id))) {
+                    setActionProperties(await actionProps(Number(id)));
                     const pool = contentPool();
                     const contract = BallotWallet.attach(group, web3);
                     const result = await contract.peek(Number(id));
@@ -110,6 +127,7 @@ const PeekingArea = () => {
                         },
                     }[];
                     const { method, inputs } = result.decodedData;
+                    let tempAction = Actions.UNKNOWN;
                     if (method === 'addBatch') {
                         for (const { cid, tag } of BallotWallet.parseAddBatch(inputs)) {
                             parsed.push({
@@ -117,7 +135,7 @@ const PeekingArea = () => {
                                 content: await contentFromIPFS(cid),
                             });
                         }
-                        setAction(Actions.ADD_BATCH);
+                        tempAction = Actions.ADD_BATCH;
                     } else if (method === 'lockBatch') {
                         const batchId = BallotWallet.parseLockBatch(inputs);
                         for (const { cid, tag } of await pool.getBatch(batchId)) {
@@ -126,7 +144,7 @@ const PeekingArea = () => {
                                 content: await contentFromIPFS(cid),
                             });
                         }
-                        setAction(Actions.LOCK_BATCH);
+                        tempAction = Actions.LOCK_BATCH;
                     } else if (method === 'unlockBatch') {
                         const batchId = BallotWallet.parseUnlockBatch(inputs);
                         for (const { cid, tag } of await pool.getBatch(batchId)) {
@@ -135,7 +153,7 @@ const PeekingArea = () => {
                                 content: await contentFromIPFS(cid),
                             });
                         }
-                        setAction(Actions.UNLOCK_BATCH);
+                        tempAction = Actions.UNLOCK_BATCH;
                     } else if (method === 'lock') {
                         const contentId = BallotWallet.parseLockContent(inputs);
                         const { cid, tag } = await pool.get(contentId);
@@ -143,7 +161,7 @@ const PeekingArea = () => {
                             tag,
                             content: await contentFromIPFS(cid),
                         });
-                        setAction(Actions.LOCK_CONTENT);
+                        tempAction = Actions.LOCK_CONTENT;
                     } else if (method === 'unlock') {
                         const contentId = BallotWallet.parseUnlockContent(inputs);
                         const { cid, tag } = await pool.get(contentId);
@@ -151,8 +169,10 @@ const PeekingArea = () => {
                             tag,
                             content: await contentFromIPFS(cid),
                         });
-                        setAction(Actions.UNLOCK_CONTENT);
+                        tempAction = Actions.UNLOCK_CONTENT;
                     }
+                    setAction(tempAction);
+                    setActionText(actionTitle(tempAction));
                     setContents(parsed);
                 } else {
                     throw new Error('Có gì đó sai sai!');
@@ -207,21 +227,33 @@ const PeekingArea = () => {
                                 )}
                                 {action !== Actions.UNKNOWN && (
                                     <>
-                                        <div className={styles.title}>
-                                            {action === Actions.ADD_BATCH && (
-                                                actionTitle(action)
-                                            )}
-                                        </div>
-                                        <div className={styles.submit}>
-                                            <ConfirmationPane
-                                                onConfirm={async () => {
-                                                    await vote(true);
-                                                }}
-                                                onReject={async () => {
-                                                    await vote(false);
-                                                }}
-                                            />
-                                        </div>
+                                        {actionText && (
+                                            <div className={styles.title}>
+                                                {actionText}
+                                            </div>
+                                        )}
+                                        {actionProperties.executed && (
+                                            <div className={styles.text}>
+                                                {'Hành động này đã được thực thi.'}
+                                            </div>
+                                        )}
+                                        {actionProperties.cancelled && (
+                                            <div className={styles.text}>
+                                                {'Hành động này đã bị huỷ.'}
+                                            </div>
+                                        )}
+                                        {!actionProperties.executed && !actionProperties.cancelled && (
+                                            <div className={styles.submit}>
+                                                <ConfirmationPane
+                                                    onConfirm={async () => {
+                                                        await vote(true);
+                                                    }}
+                                                    onReject={async () => {
+                                                        await vote(false);
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
                                         {contents.map(({ tag, content }, index) => (
                                             <ContentArea
                                                 key={index}
