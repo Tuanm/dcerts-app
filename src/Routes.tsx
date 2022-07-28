@@ -7,6 +7,7 @@ import NotFound from './screens/NotFound';
 import PeekingArea from './screens/PeekingArea';
 import PreviewArea from './screens/PreviewArea';
 import Search from './screens/Search';
+import Test from './screens/Test';
 import UploadArea from './screens/UploadArea';
 import VotingArea from './screens/VotingArea';
 
@@ -58,6 +59,12 @@ export const PreviewAreaRoute = {
     element: <PreviewArea />,
 };
 
+export const TestRoute = {
+    text: 'Kiểm tra',
+    path: '/test',
+    element: <Test />,
+};
+
 export const NotFoundRoute = {
     text: 'Không tìm thấy',
     path: '*',
@@ -74,6 +81,7 @@ const Routes = () => {
         PeekingAreaRoute,
         LockingAreaRoute,
         PreviewAreaRoute,
+        TestRoute,
         NotFoundRoute, // let it be the last route
     ]);
 

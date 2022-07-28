@@ -15,6 +15,7 @@ interface AuthProps {
     group?: string,
     interval?: number,
     noButtons?: boolean,
+    excepts?: string[],
 }
 
 const AuthMessages = {
@@ -105,23 +106,25 @@ const AuthFilter = (props: AuthProps) => {
     useEffect(() => {
         setGroup(props.group);
         (async () => {
-            setAuthorizing(true);
-            await startAuthorizing();
-            if (props.interval) {
-                setTimer(setInterval(async () => {
-                    await startAuthorizing();
-                }, props.interval));
+            if (props.excepts && props.excepts.includes(window.location.pathname)) {
+                setAuthorized(true);
+            } else {
+                setAuthorizing(true);
+                await startAuthorizing();
+                if (props.interval) {
+                    setTimer(setInterval(async () => {
+                        await startAuthorizing();
+                    }, props.interval));
+                }
+                setAuthorizing(false);
             }
-            setAuthorizing(false);
         })();
     }, []);
 
     return (
         <>
             {authorizing && !group && (
-                <LoadingComponent
-                    text={'Vui lòng đợi...'}
-                />
+                <LoadingComponent />
             )}
             {authorized && !props.noButtons && (
                 <GoBackIcon
