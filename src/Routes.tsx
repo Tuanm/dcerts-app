@@ -1,6 +1,7 @@
 import React from 'react';
 import { useRoutes } from 'react-router-dom';
 import Dashboard from './screens/Dashboard';
+import Dev from './screens/Dev';
 import Home from './screens/Home';
 import LockingArea from './screens/LockingArea';
 import NotFound from './screens/NotFound';
@@ -65,6 +66,12 @@ export const TestRoute = {
     element: <Test />,
 };
 
+export const DevRoute = {
+    text: 'Thử nghiệm',
+    path: '/dev',
+    element: <Dev />,
+};
+
 export const NotFoundRoute = {
     text: 'Không tìm thấy',
     path: '*',
@@ -82,6 +89,7 @@ const Routes = () => {
         LockingAreaRoute,
         PreviewAreaRoute,
         TestRoute,
+        DevRoute,
         NotFoundRoute, // let it be the last route
     ]);
 

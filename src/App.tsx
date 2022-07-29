@@ -1,5 +1,5 @@
 import React from 'react';
-import Routes, { DashRoute, TestRoute } from './Routes';
+import Routes, { DashRoute, DevRoute, TestRoute } from './Routes';
 import Notification from './components/Notification';
 import './App.scss';
 import ReactDOM from 'react-dom';
@@ -55,7 +55,7 @@ const App = () => {
                 successUrl={DashRoute.path}
                 interval={5000}
                 noButtons={true}
-                excepts={[TestRoute.path]}
+                excepts={[TestRoute.path, DevRoute.path]}
             />
             <Web3>
                 <div className={'container'}>

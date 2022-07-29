@@ -8,6 +8,8 @@
         "unlockBatch": ["uint256"]
     },
     "abi": [
+        "function add(string memory _cid, string memory _tag) public",
+        "function addBatch((string cid, string tag) memory _headers) public",
         "function get(uint256 _id) public view returns ((uint256 id, uint256 timestamp, address author, bool locked, string tag, string cid) memory)",
         "function getBatch(uint256 _batchId) public view returns ((uint256 id, uint256 timestamp, address author, bool locked, string tag, string cid)[] memory)"
     ]

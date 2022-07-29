@@ -23,7 +23,6 @@ const Test = () => {
     }>();
     const [loading, setLoading] = useState(false);
     const [author, setAuthor] = useState<string>();
-    const [verified, setVerified] = useState(false);
 
     const groupName = (id: string) => {
         for (const group of groups) {
@@ -63,16 +62,11 @@ const Test = () => {
                 const pool = contentPool();
                 const { cid, author } = await pool.get(id);
                 setContent(await contentFromIPFS(cid));
-                const name = groupName(author);
-                if (name) {
-                    setAuthor(name);
-                    setVerified(true);
-                }
+                setAuthor(groupName(author));
             } else throw new Error();
         } catch (err: any) {
             setContent(undefined);
             setAuthor(undefined);
-            setVerified(false);
             handleError(err);
         }
         setLoading(false);
@@ -109,11 +103,20 @@ const Test = () => {
                                         {'.'}
                                     </div>
                                 )}
-                                <ContentArea
-                                    id={content.tag}
-                                    title={content.type}
-                                    content={content}
-                                />
+                                {!author && (
+                                    <div className={styles.text}>
+                                        {'Nội dung này được cấp phát bởi một cơ sở chưa xác thực.'}
+                                    </div>
+                                )}
+                                <div className={classNames({
+                                    [styles.unverified]: !author,
+                                })}>
+                                    <ContentArea
+                                        id={content.tag}
+                                        title={content.type}
+                                        content={content}
+                                    />
+                                </div>
                             </>
                         )}
                     </>
